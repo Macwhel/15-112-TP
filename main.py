@@ -1,3 +1,11 @@
-from astar import *
-from dijkstra import *
-from board import *
+from cmu_112_graphics import *
+
+
+
+def main():
+    pass
+
+
+
+if __name__ == "__main__":
+    main()
