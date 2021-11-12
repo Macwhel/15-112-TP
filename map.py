@@ -25,15 +25,30 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> list:
     
     # where we make our first tunnel (gotta start somewhere)
     curPos = (random.randint(0, rows - 1), random.randint(0, cols - 1))
+
+    # we'll use this later for the player starting position
+    firstPos = curPos
+
+    # set this to be part of the path
     gameMap[curPos[0]][curPos[1]] = 7
-    print(curPos)
+
     # it goes:      up      down    left     right
     directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 
     lastDir = (0,0)
     
-    # generate tunnels
+    # generate tunnels in the game map
+
+    # this is needed for a while loop
     numTunsLeft = 0
+
+    '''using a while loop so that we can control when we increment the number
+    of tunnels left, which is important in a certain case:
+
+    if the tunnel is at a wall, and the new direction goes into the wall,
+    then the loop will immediately break and a for loop would increment, but
+    we dont want that'''
+
     while numTunsLeft < maxTuns:
         lenOfCurTun = 0
         dir = getDirection(directions, lastDir)
@@ -50,10 +65,6 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> list:
             numTunsLeft += 1
         lastDir = dir
 
-    for row in gameMap:
-        print(row)
+    return (gameMap, firstPos)
 
-    return gameMap
-
-createMap((20,20), 50, 7)
 
