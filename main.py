@@ -1,12 +1,17 @@
 from cmu_112_graphics import *
-from mob import *
-from copy import *
 from player import *
+from map import*
 
-def main():
+def appStarted(app):
+    app.gameMap = createMap
+
+def keyPressed(app, event):
+    pass
+
+def redrawAll(app, canvas):
     pass
 
 
 
 if __name__ == "__main__":
-    main()
+    runApp(width = 800, height = 800)

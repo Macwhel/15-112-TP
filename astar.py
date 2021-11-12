@@ -1,0 +1,4 @@
+
+def aStar() -> list:
+    pass
+
