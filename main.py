@@ -7,32 +7,64 @@ def appStarted(app):
     app.rows, app.cols = (20, 20)
     app.sW = min(app.width / app.rows, app.height / app.rows)
 
-    # get the map and the player's starting location
-    app.gameMap, app.pLoc = createMap((app.rows, app.cols), 50, 7)
-    print(app.pLoc)
+    # initilalize map and then get start locations for player and end goal as
+    # well as acceptable mob locations
+    '''Adjust maxTuns and maxLen scalings'''
+    app.gameMap, app.pLoc, app.gLoc, app.mLocs = createMap(
+        (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
     app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3)
+    print(app.mLocs)
 
+    # for bugtesting
+    '''for i in app.gameMap:
+        print(i)'''
 
+    # initialize mobs in random locations
 
+# this is a little scuffed so change it later to be cleaner
 def keyPressed(app, event):
-    pass
+    lastCoords = (app.player.y, app.player.x)
+
+    if (event.key == 'Up'):
+        app.player.y -= 1
+    if (event.key == 'Down'):
+        app.player.y += 1
+    if (event.key == 'Right'):
+        app.player.x += 1
+    if (event.key == 'Left'):
+        app.player.x -= 1
+
+    pY = app.player.getY()
+    pX = app.player.getX()
+
+    if (pY not in range(app.rows) or pX not in range(app.cols) or 
+        app.gameMap[pY][pX] == 0):
+        app.player.setY(lastCoords[0])
+        app.player.setX(lastCoords[1])
+    
+    
 
 def redrawAll(app, canvas):
-    for i, row in enumerate(app.gameMap):
-        for j, val in enumerate(row):
+    for i in range(len(app.gameMap)):
+        for j in range(len(app.gameMap[0])):
             cell = Rectangle(i * app.sW, j * app.sW, app.sW)
 
-            if val == 0:
+            if app.gameMap[i][j] == 0:
                 cell.setColor('black')
             else:
-                cell.setColor('white')
+                if (i, j) == app.gLoc:
+                    cell.setColor('green')
+                else: 
+                    cell.setColor('white')
 
             canvas.create_rectangle(cell.x, cell.y, cell.x2, cell.y2, fill = 
                                     cell.color, width = 0)
 
             # coords for player
-            x = app.player.x * app.sW
-            y = app.player.y * app.sW
+            x = app.player.x * app.sW + (app.sW / 2)
+            y = app.player.y * app.sW + (app.sW / 2)
+
+            # draw player
             canvas.create_oval(
                 x - app.player.radius,
                 y - app.player.radius,
@@ -43,5 +75,6 @@ def redrawAll(app, canvas):
 
 
 
+
 if __name__ == "__main__":
-    runApp(width = 800, height = 800)
+    runApp(width = 400, height = 400)

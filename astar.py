@@ -1,4 +1,4 @@
 
-def aStar() -> list:
+def aStar() -> tuple:
     pass
 

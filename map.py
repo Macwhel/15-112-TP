@@ -10,7 +10,8 @@ def getDirection(directions: list, lastDirection: list) -> list:
         dir = random.choice(directions)
     return dir
 
-def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> list:
+def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> (
+    list, tuple, tuple, list):
 
     if maxTuns < 0 or maxLen < 0:
         raise ValueError("Use positive numbers please")
@@ -37,10 +38,6 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> list:
 
     lastDir = (0,0)
     
-    # generate tunnels in the game map
-
-    # this is needed for a while loop
-    numTunsLeft = 0
 
     '''using a while loop so that we can control when we increment the number
     of tunnels left, which is important in a certain case:
@@ -48,6 +45,17 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> list:
     if the tunnel is at a wall, and the new direction goes into the wall,
     then the loop will immediately break and a for loop would increment, but
     we dont want that'''
+
+    # this is needed for a while loop
+    numTunsLeft = 0
+
+    # this is needed to get the goal node
+    goalNodeIt = random.randint(0.75 * maxTuns, maxTuns)
+
+    # initialize list for legal mob positions
+    legalMobPos = []
+
+    # generate tunnels in the game map
 
     while numTunsLeft < maxTuns:
         lenOfCurTun = 0
@@ -60,11 +68,18 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> list:
             else:
                 lenOfCurTun += 1
                 curPos = (r, c)
+                if numTunsLeft > 0.5 * maxTuns:
+                    legalMobPos.append(curPos)
                 gameMap[r][c] = 7
         if lenOfCurTun >= 1:
             numTunsLeft += 1
+
+        if goalNodeIt >= 1:
+            goalNodeIt -= 1
+        else:
+            goalPos = (r,c)
         lastDir = dir
 
-    return (gameMap, firstPos)
+    return (gameMap, firstPos, goalPos, legalMobPos)
 
 
