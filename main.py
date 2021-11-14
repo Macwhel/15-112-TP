@@ -2,18 +2,29 @@ from cmu_112_graphics import *
 from player import *
 from map import *
 from rectangle import *
+from mob import *
 
 def appStarted(app):
+    # these are things that'll change depending on difficulty
     app.rows, app.cols = (20, 20)
+    numOfMobs = 4
+
     app.sW = min(app.width / app.rows, app.height / app.rows)
 
     # initilalize map and then get start locations for player and end goal as
     # well as acceptable mob locations
-    '''Adjust maxTuns and maxLen scalings'''
-    app.gameMap, app.pLoc, app.gLoc, app.mLocs = createMap(
+    '''Adjust maxTuns and maxLen scalings on difficulty'''
+    app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
         (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
     app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3)
-    print(app.mLocs)
+    
+    # make a list of unique mob spawning locations
+    app.mobListLoc = random.sample(mLocs, numOfMobs)
+
+    # create a list of mob classes
+    app.mobList = [Mob(i[1], i[0], app.sW / 3, 10) for i in app.mobListLoc]
+
+
 
     # for bugtesting
     '''for i in app.gameMap:
@@ -71,6 +82,18 @@ def redrawAll(app, canvas):
                 x + app.player.radius,
                 y + app.player.radius,
                 fill = app.player.color)
+
+            # draw mobs
+            for mob in app.mobList:
+                x = mob.x * app.sW + (app.sW / 2)
+                y = mob.y * app.sW + (app.sW / 2)
+                canvas.create_oval(
+                    x - mob.rad,
+                    y - mob.rad,
+                    x + mob.rad,
+                    y + mob.rad,
+                    fill = "red"
+                )
 
 
 

@@ -1,8 +1,8 @@
 
 class Mob:
 
-    def __init__(self, x, y, mobType, rad):
+    def __init__(self, x, y, rad, moveFreq):
         self.x = x
         self.y = y
         self.rad = rad
-        self.type = mobType
+        self.moveFreq = moveFreq

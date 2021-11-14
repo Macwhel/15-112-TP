@@ -10,6 +10,9 @@ def getDirection(directions: list, lastDirection: list) -> list:
         dir = random.choice(directions)
     return dir
 
+# utilizes a random walker algorithm for map generation 
+# (https://www.freecodecamp.org/news/how-to-make-your-own-procedural-dungeon-map-generator-using-the-random-walk-algorithm-e0085c8aa9a/)
+
 def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> (
     list, tuple, tuple, list):
 
