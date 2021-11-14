@@ -3,11 +3,13 @@ from player import *
 from map import *
 from rectangle import *
 from mob import *
+from astar import *
 
 def appStarted(app):
     # these are things that'll change depending on difficulty
     app.rows, app.cols = (20, 20)
     numOfMobs = 4
+    app.timerDelay = 250
 
     app.sW = min(app.width / app.rows, app.height / app.rows)
 
@@ -50,7 +52,11 @@ def keyPressed(app, event):
         app.player.setY(lastCoords[0])
         app.player.setX(lastCoords[1])
     
-    
+def timerFired(app):
+    print('hi')
+    # change the coords of every mob thing
+    for mob in app.mobList:
+        (mob.x, mob.y) = getNextPos((mob.x, mob.y), app.pLoc, app.gameMap)
 
 def redrawAll(app, canvas):
     for i in range(len(app.gameMap)):

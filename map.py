@@ -13,8 +13,7 @@ def getDirection(directions: list, lastDirection: list) -> list:
 # utilizes a random walker algorithm for map generation 
 # (https://www.freecodecamp.org/news/how-to-make-your-own-procedural-dungeon-map-generator-using-the-random-walk-algorithm-e0085c8aa9a/)
 
-def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> (
-    list, tuple, tuple, list):
+def createMap(dimensions: tuple, maxTuns: int, maxLen: int):
 
     if maxTuns < 0 or maxLen < 0:
         raise ValueError("Use positive numbers please")

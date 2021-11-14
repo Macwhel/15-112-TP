@@ -1,9 +1,15 @@
-a = [
-    [1,2,3],
-    [4,5,6],
-    [7,8,9]
+from astar import *
+import sys
+print(f'"{sys.executable}" -m pip install pillow')
+print(f'"{sys.executable}" -m pip install requests')
+
+
+gameBoard = [
+    [0,0,7],
+    [7,7,7],
+    [7,0,0],
 ]
 
-b = [i for row in a for i in row]
-
-print(b)
+a = aStar((2,0), (0,2), gameBoard)
+print(a[-1])
+# expect: (2, 0), (1, 0), (1, 1), (1, 2), (0,2) in reverse
