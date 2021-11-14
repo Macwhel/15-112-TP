@@ -33,17 +33,14 @@ def appStarted(app):
     # initialize mobs in random locations
 
 # this is a little scuffed so change it later to be cleaner
+
 def keyPressed(app, event):
     lastCoords = (app.player.y, app.player.x)
 
-    if (event.key == 'Up'):
-        app.player.y -= 1
-    if (event.key == 'Down'):
-        app.player.y += 1
-    if (event.key == 'Right'):
-        app.player.x += 1
-    if (event.key == 'Left'):
-        app.player.x -= 1
+    if (event.key == 'Up'): app.player.y -= 1
+    if (event.key == 'Down'): app.player.y += 1
+    if (event.key == 'Right'): app.player.x += 1
+    if (event.key == 'Left'): app.player.x -= 1
 
     pY = app.player.getY()
     pX = app.player.getX()
