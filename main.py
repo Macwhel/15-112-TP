@@ -8,7 +8,7 @@ from astar import *
 def appStarted(app):
     # these are things that'll change depending on difficulty
     app.rows, app.cols = (20, 20)
-    numOfMobs = 4
+    numOfMobs = 2
     app.timerDelay = 250
 
     app.sW = min(app.width / app.rows, app.height / app.rows)
@@ -44,19 +44,26 @@ def keyPressed(app, event):
     if (event.key == 'Right'): app.player.x += 1
     if (event.key == 'Left'): app.player.x -= 1
 
+    # for debugging purposes
+    '''if (event.key == "Space"):
+        for i, mob in enumerate(app.mobList):
+            (mob.y, mob.x) = getNextPos((mob.y, mob.x), app.pLoc, app.gameMap)
+            print(i, mob.y, mob.x, app.pLoc)'''
+
     pY = app.player.getY()
     pX = app.player.getX()
 
+    # change player location
     if (pY not in range(app.rows) or pX not in range(app.cols) or 
         app.gameMap[pY][pX] == 0):
         app.player.setY(lastCoords[0])
         app.player.setX(lastCoords[1])
     
 def timerFired(app):
-    print('hi')
+
     # change the coords of every mob thing
     for mob in app.mobList:
-        (mob.x, mob.y) = getNextPos((mob.x, mob.y), app.pLoc, app.gameMap)
+        (mob.y, mob.x) = getNextPos((mob.y, mob.x), app.pLoc, app.gameMap)
 
 def redrawAll(app, canvas):
     for i in range(len(app.gameMap)):
@@ -98,6 +105,26 @@ def redrawAll(app, canvas):
                     fill = "red"
                 )
 
+            # debugging purposes
+            '''x = app.mobList[0].x * app.sW + (app.sW / 2)
+            y = app.mobList[0].y * app.sW + (app.sW / 2)
+            canvas.create_oval(
+                x - app.mobList[0].rad,
+                y - app.mobList[0].rad,
+                x + app.mobList[0].rad,
+                y + app.mobList[0].rad,
+                fill = "red"
+            )
+
+            x1 = app.mobList[1].x * app.sW + (app.sW / 2)
+            y1 = app.mobList[1].y * app.sW + (app.sW / 2)
+            canvas.create_oval(
+                x1 - app.mobList[1].rad,
+                y1 - app.mobList[1].rad,
+                x1 + app.mobList[1].rad,
+                y1 + app.mobList[1].rad,
+                fill = "blue"
+            )'''
 
 
 
