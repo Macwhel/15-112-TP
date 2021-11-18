@@ -76,13 +76,9 @@ def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
     return curPos
 
 # calls aStar to find the next position for the mob to move
-def getNextPos(curPos: tuple, endPos: tuple, gameMap: list) -> tuple:
+def getNextPos(curPos, endPos, gameMap) -> tuple:
     res = aStar(curPos, endPos, gameMap)
-    if res:
-        return res[-1]
-    else:
-        return curPos
-    
+    return res[-1] if res else curPos
 
 
 

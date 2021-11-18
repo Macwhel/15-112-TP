@@ -18,8 +18,8 @@ def appStarted(app):
 
     # initiliaze game states: 
     '''Travel, Fight, etc.'''
-    app.Travel = False
-    app.mobFight = True
+    app.Travel = True
+    app.mobFight = False
     app.bossFight = False
 
     # initilalize map and then get start locations for player and end goal as
@@ -32,8 +32,11 @@ def appStarted(app):
     # make a list of unique mob spawning locations
     app.mobListLoc = random.sample(mLocs, numOfMobs)
 
-    # create a list of mob classes
+    # create a dictionary of mob classes
     app.mobList = [Mob(i[1], i[0], app.sW / 3, 10) for i in app.mobListLoc]
+
+    # have a set to keep track of the coords so the mobs don't overlap
+    app.mobCoords = {(i[0], i[1]) for i in app.mobListLoc}
 
 
 def keyPressed(app, event):
@@ -59,25 +62,14 @@ def keyPressed(app, event):
         app.player.setX(lastCoords[1])
     
 def timerFired(app):
-<<<<<<< HEAD
-    print('hi')
-
-    # for testing purposes
-    mobCoords = []
-
-    # change the coords of every mob thing
-    for mob in app.mobList:
-        (mob.y, mob.x) = getNextPos((mob.x, mob.y), app.pLoc, app.gameMap)
-        mobCoords.append((mob.y, mob.x))
-
-    print(mobCoords)
-
-=======
-    # change the coords of every mob
+    # change the coords of every mob if a mob isn't in there already
     if app.Travel:
         for mob in app.mobList:
-            (mob.y, mob.x) = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
->>>>>>> 8b01b76a7e834a9d0cc199c98b7a6b5761e9c654
+            pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
+            if pos not in app.mobCoords:
+                app.mobCoords.discard((mob.y, mob.x))
+                (mob.y, mob.x) = pos
+                app.mobCoords.add(pos)
 
 def redrawAll(app, canvas):
     if app.Travel:
@@ -121,7 +113,7 @@ def redrawAll(app, canvas):
             )
 
     elif app.mobFight:
-        canvas.create_rectangle(0, 0, app.width, app.height, fill = "black")
+        canvas.create_rectangle(0, 0, app.width, app.height, fill = "white")
 
         pass
     
