@@ -54,9 +54,17 @@ def keyPressed(app, event):
     
 def timerFired(app):
     print('hi')
+
+    # for testing purposes
+    mobCoords = []
+
     # change the coords of every mob thing
     for mob in app.mobList:
-        (mob.x, mob.y) = getNextPos((mob.x, mob.y), app.pLoc, app.gameMap)
+        (mob.y, mob.x) = getNextPos((mob.x, mob.y), app.pLoc, app.gameMap)
+        mobCoords.append((mob.y, mob.x))
+
+    print(mobCoords)
+
 
 def redrawAll(app, canvas):
     for i in range(len(app.gameMap)):

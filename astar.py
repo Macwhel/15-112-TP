@@ -40,6 +40,9 @@ def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
         # if we reach the end
         if cur == endPos:
 
+            # for bugtesting
+            #print(prevNode)
+
             # then trace back your steps
             res = []
             temp = cur
