@@ -5,13 +5,17 @@ from rectangle import *
 from mob import *
 from astar import *
 
+def appStartedHelper():
+    pass
 
 def appStarted(app):
 
     # these are things that'll change depending on difficulty
-    app.rows, app.cols = (25, 25)
-    numOfMobs = 4
+    # take stff from something
+    app.rows, app.cols = (20, 20)
+    numOfMobs = 3
     app.timerDelay = 250
+    battleMobHealth = 100
 
     # make it relative to window size
     app.sW = min(app.width / app.rows, app.height / app.rows)
@@ -38,31 +42,109 @@ def appStarted(app):
     # have a set to keep track of the coords so the mobs don't overlap
     app.mobCoords = {(i[0], i[1]) for i in app.mobListLoc}
 
+    # initialize a mob for the mob fight
+
+    # **Change the location so that if you meet the mob from your left then 
+    # the battle starts from left if that makes sense. From top then top and bottom,
+    # bottom then bottom top
+    # change size of mob depending on difficulty as well
+    app.battleMob = BattleMob(
+        app.height / 4, 
+        app.width / 2, 
+        app.sW * 1.5,
+        2,
+        100,
+        100)
+    
+    # need this for later
+    app.initialBMSpeed = app.battleMob.d
+    app.counter = 0
+
+    app.battlePlayer = Player(
+        3 * app.height / 4, app.width / 2, 
+        app.sW, 
+        3,
+        2)
+
+    app.hitCounter = 0
+    app.beenHitCounter = 0
+    app.combo = 0
+    app.dmgMult = 1
+
+    # initialize mouse pressed locations
+    app.cx = app.cy = 0
+
 
 def keyPressed(app, event):
-    lastCoords = (app.player.y, app.player.x)
+    if app.Travel:
+        lastCoords = (app.player.y, app.player.x)
 
-    if (event.key == 'Up'): app.player.y -= 1
-    if (event.key == 'Down'): app.player.y += 1
-    if (event.key == 'Right'): app.player.x += 1
-    if (event.key == 'Left'): app.player.x -= 1
+        if (event.key == 'Up'): app.player.y -= 1
+        if (event.key == 'Down'): app.player.y += 1
+        if (event.key == 'Right'): app.player.x += 1
+        if (event.key == 'Left'): app.player.x -= 1
 
-    # for debugging purposes
-    '''if (event.key == "Space"):
-        for i, mob in enumerate(app.mobList):
-            (mob.y, mob.x) = getNextPos((mob.y, mob.x), app.pLoc, app.gameMap)
-            print(i, mob.y, mob.x, app.pLoc)'''
+        # for debugging purposes
+        '''if (event.key == "Space"):
+            for i, mob in enumerate(app.mobList):
+                (mob.y, mob.x) = getNextPos((mob.y, mob.x), app.pLoc, app.gameMap)
+                print(i, mob.y, mob.x, app.pLoc)'''
 
-    # change player location
-    pY = app.player.getY()
-    pX = app.player.getX()
-    if (pY not in range(app.rows) or pX not in range(app.cols) or 
-        app.gameMap[pY][pX] == 0):
-        app.player.setY(lastCoords[0])
-        app.player.setX(lastCoords[1])
+        # change player coords back if the space the players wants to move in is illegal
+        pY = app.player.getY()
+        pX = app.player.getX()
+        if (pY not in range(app.rows) or pX not in range(app.cols) or 
+            app.gameMap[pY][pX] == 0):
+            app.player.setY(lastCoords[0])
+            app.player.setX(lastCoords[1])
+
+        # Check if player reached goal
+        elif (pY, pX) == app.gLoc:
+            # implement later
+            pass
+
+    elif app.mobFight:
+
+        if (event.key == 'Up'): app.battlePlayer.y -= 10
+        if (event.key == 'Down'): app.battlePlayer.y += 10
+        if (event.key == 'Right'): app.battlePlayer.x += 10
+        if (event.key == 'Left'): app.battlePlayer.x -= 10
+
+        # change player coords back if the space the players wants to move in is illegal
+        pY = app.player.getY()
+        pX = app.player.getX()
+        if (pY not in range(app.rows) or pX not in range(app.cols) or 
+            app.gameMap[pY][pX] == 0):
+            app.player.setY(lastCoords[0])
+            app.player.setX(lastCoords[1])
+
+def mousePressed(app, event):
+    if app.mobFight:
+        app.cx = event.x
+        app.cy = event.y
+        
+        tempY = app.battleMob.y
+        tempX = app.battleMob.x
+        tempRad = app.battleMob.rad
+
+        if ((tempY - tempRad) < app.cy < (tempY + tempRad) 
+            and (tempX - tempRad) < app.cx < (tempX + tempRad)): 
+            # if the mouse is on the mob
+            app.hitCounter += 1
+            app.combo += 1
+            app.dmgMult = max(app.combo // 10, 1)
+            app.battleMob.curHealth -= app.dmgMult * app.battlePlayer.dmg
+            
+        else:
+            app.hitCounter -= 1
+            app.combo = 0
+            app.dmgMult = max(1, app.dmgMult - 1)
+
     
 def timerFired(app):
     # change the coords of every mob if a mob isn't in there already
+    app.counter += 1
+
     if app.Travel:
         for mob in app.mobList:
             pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
@@ -70,6 +152,29 @@ def timerFired(app):
                 app.mobCoords.discard((mob.y, mob.x))
                 (mob.y, mob.x) = pos
                 app.mobCoords.add(pos)
+            elif pos == app.player.loc():
+                app.mobFight = True
+                app.Travel = False
+                app.timerDelay = 100
+
+    elif app.mobFight:
+        m = app.battleMob
+        p = app.battlePlayer
+        (m.y, m.x) = simpleGetNextPos((m.y, m.x), (p.y, p.x), m.d)
+        if ((m.y - m.rad) < p.y < (m.y + m.rad) and 
+            (m.x - m.rad) < p.x < (m.x + m.rad)): # mob touches player
+            app.beenHitCounter += 1
+        
+        if app.initialBMSpeed == app.battleMob.d:
+            a = random.randint(1, 9)
+            if a == 3 or a == 2:
+                app.battleMob.d *= 5
+                app.counter = 0
+        else:
+            if app.counter >= 5:
+                app.battleMob.d = app.initialBMSpeed
+        
+
 
 def redrawAll(app, canvas):
     if app.Travel:
@@ -115,8 +220,32 @@ def redrawAll(app, canvas):
     elif app.mobFight:
         canvas.create_rectangle(0, 0, app.width, app.height, fill = "white")
 
-        pass
+        # draw mob
+        m = app.battleMob
+        canvas.create_rectangle(
+            m.x - m.rad, 
+            m.y - m.rad,
+            m.x + m.rad,
+            m.y + m.rad,
+            fill = "red")
+
+        # draw player
+        p = app.battlePlayer
+        canvas.create_oval(
+            p.x - p.radius,
+            p.y - p.radius,
+            p.x + p.radius,
+            p.y + p.radius,
+            fill = "yellow"
+        )
     
+        canvas.create_text(app.width / 10, app.height / 10,
+                            text = f'{app.dmgMult}x', font = 'Arial 20 bold')
+        canvas.create_text(9 * app.width / 10, app.height / 10,
+                            text = f'{app.beenHitCounter}', font = 'Arial 20 bold')
+
+        canvas.create_text(app.width / 2, app.height / 10,
+                            text = f'Health: {((m.curHealth / m.maxHealth) * 100):.2f}%')
     elif app.bossFight:
         pass
 

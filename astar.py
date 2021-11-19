@@ -1,4 +1,7 @@
 import queue
+import math
+
+#make a priority queue thing for more lines of code
 
 # helper function for aStar
 def h(curPos: tuple, endPos: tuple) -> int:
@@ -10,7 +13,7 @@ def h(curPos: tuple, endPos: tuple) -> int:
 
 def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
 
-    # want a priority queue for getting the locations
+    # want a priority queue for getting the locations (recommended)
     q = queue.PriorityQueue()
 
     # add the start node
@@ -80,5 +83,27 @@ def getNextPos(curPos, endPos, gameMap) -> tuple:
     res = aStar(curPos, endPos, gameMap)
     return res[-1] if res else curPos
 
+# simple get next position
+def simpleGetNextPos(start: tuple, end: tuple, jumpDistance: int) -> tuple:
+    startY, startX = start[0], start[1]
+    endY, endX = end[0], end[1]
+
+    # find norm or smth I forgot what it's called
+    yDiff = endY - startY
+    xDiff = endX - startX
+
+    norm = math.sqrt(yDiff ** 2 + xDiff ** 2)
+    if norm == 0:
+        return (startY, startX)
+        
+    unitVec = (yDiff / norm, xDiff / norm)
+
+    distance = (jumpDistance * unitVec[0], jumpDistance * unitVec[1])
+
+    return (start[0] + distance[0], start[1] + distance[1])
 
 
+
+    
+
+    
