@@ -1,87 +1,243 @@
-from cmu_112_graphics import *
-import random
 
-##########################################
-# Splash Screen Mode
-##########################################
+def Travel_redrawAll(app, canvas):
+    for i in range(len(app.gameMap)):
+            for j in range(len(app.gameMap[0])):
+                cell = Rectangle(i * app.sW, j * app.sW, app.sW)
 
-def splashScreenMode_redrawAll(app, canvas):
-    font = 'Arial 26 bold'
-    canvas.create_text(app.width/2, 150, text='This demos a ModalApp!', font=font)
-    canvas.create_text(app.width/2, 200, text='This is a modal splash screen!', font=font)
-    canvas.create_text(app.width/2, 250, text='Press any key for the game!', font=font)
+                if app.gameMap[i][j] == 0:
+                    cell.setColor('black')
+                else:
+                    if (i, j) == app.gLoc:
+                        cell.setColor('green')
+                    else: 
+                        cell.setColor('white')
 
-def splashScreenMode_keyPressed(app, event):
-    app.mode = 'gameMode'
+                canvas.create_rectangle(cell.x, cell.y, cell.x2, cell.y2, fill = 
+                                        cell.color, width = 0)
+    p = app.player
 
-##########################################
-# Game Mode
-##########################################
+    # coords for player
+    x = p.x * app.sW + (app.sW / 2)
+    y = p.y * app.sW + (app.sW / 2)
 
-def gameMode_redrawAll(app, canvas):
-    font = 'Arial 26 bold'
-    canvas.create_text(app.width/2, 20, text=f'Score: {app.score}', font=font)
-    canvas.create_text(app.width/2, 60, text='Click on the dot!', font=font)
-    canvas.create_text(app.width/2, 100, text='Press h for help screen!', font=font)
-    canvas.create_text(app.width/2, 140, text='Press v for an MVC Violation!', font=font)
-    canvas.create_oval(app.x-app.r, app.y-app.r, app.x+app.r, app.y+app.r,
-                       fill=app.color)
-    if app.makeAnMVCViolation:
-        app.ohNo = 'This is an MVC Violation!'
+    # draw player
+    canvas.create_oval(
+        x - p.radius,
+        y - p.radius,
+        x + p.radius,
+        y + p.radius,
+        fill = p.color)
 
-def gameMode_timerFired(app):
-    moveDot(app)
+    # draw mobs
+    for mob in app.mobList:
+        x = mob.x * app.sW + (app.sW / 2)
+        y = mob.y * app.sW + (app.sW / 2)
+        canvas.create_oval(
+            x - mob.rad,
+            y - mob.rad,
+            x + mob.rad,
+            y + mob.rad,
+            fill = "red"
+        )
 
-def gameMode_mousePressed(app, event):
-    d = ((app.x - event.x)**2 + (app.y - event.y)**2)**0.5
-    if (d <= app.r):
-        app.score += 1
-        randomizeDot(app)
-    elif (app.score > 0):
-        app.score -= 1
+    # draw that little border on the bottom of the map
+    border = app.rows * app.sW
+    canvas.create_line(0, border, app.boardHeight, border,
+                        width = 3)
+    canvas.create_line(border, 0, border, app.boardHeight, width = 3)
+    
+    canvas.create_text(app.width / 6, app.height - 10,
+                        text = f'Health: {int(p.curHealth)}', font = 'Arial 13 bold')
+    canvas.create_text(5 * app.width / 6, app.height - 10,
+                        text = f'Money: {p.money}', font = 'Arial 13 bold')
 
-def gameMode_keyPressed(app, event):
-    if (event.key == 'h'):
-        app.mode = 'helpMode'
-    elif (event.key == 'v'):
-        app.makeAnMVCViolation = True
+def mobFight_redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = "white")
 
-##########################################
-# Help Mode
-##########################################
+    # draw mob
+    m = app.battleMob
+    canvas.create_rectangle(
+        m.x - m.rad, 
+        m.y - m.rad,
+        m.x + m.rad,
+        m.y + m.rad,
+        fill = "red")
 
-def helpMode_redrawAll(app, canvas):
-    font = 'Arial 26 bold'
-    canvas.create_text(app.width/2, 150, text='This is the help screen!', font=font)
-    canvas.create_text(app.width/2, 250, text='(Insert helpful message here)', font=font)
-    canvas.create_text(app.width/2, 350, text='Press any key to return to the game!', font=font)
+    # draw player
+    p = app.battlePlayer
+    canvas.create_oval(
+        p.x - p.radius,
+        p.y - p.radius,
+        p.x + p.radius,
+        p.y + p.radius,
+        fill = "yellow"
+    )
 
-def helpMode_keyPressed(app, event):
-    app.mode = 'gameMode'
+    canvas.create_text(app.width / 4, app.height / 9,
+                        text = f'Dmg Multiplier: {app.dmgMult}x', font = 'Arial 13 bold')
+    canvas.create_text(3 * app.width / 4, app.height / 9,
+                        text = f'Health Left: {int(p.curHealth)}', font = 'Arial 13 bold')
+    canvas.create_text(app.width / 2, app.height / 20,
+                        text = f'Mob Health: {((m.curHealth / m.maxHealth) * 100):.2f}%')
 
-##########################################
-# Main App
-##########################################
+def Travel_timerfired(app):
+    for i, mob in enumerate(app.mobList):
+            pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
+            if pos not in app.mobCoords:
+                app.mobCoords.discard((mob.y, mob.x))
+                (mob.y, mob.x) = pos # update the mob's position
+                app.mobCoords.add(pos) # update the set as well
 
-def appStarted(app):
-    app.mode = 'splashScreenMode'
-    app.score = 0
-    app.timerDelay = 50
-    app.makeAnMVCViolation = False
-    randomizeDot(app)
+            # Mob meets player
+            elif pos == app.player.loc():
+                app.gameState = 'mobFight'
+                app.timerDelay = 100
+                app.indexOfLastMobFought = i
+                app.battleMob = app.battleMobList[i]
+                app.initialBMSpeed = app.battleMob.d
 
-def randomizeDot(app):
-    app.x = random.randint(20, app.width-20)
-    app.y = random.randint(20, app.height-20)
-    app.r = random.randint(10, 20)
-    app.color = random.choice(['red', 'orange', 'yellow', 'green', 'blue'])
-    app.dx = random.choice([+1,-1])*random.randint(3,6)
-    app.dy = random.choice([+1,-1])*random.randint(3,6)
+def mobFight_timerfired(app):
+    app.counter += 1
+    m = app.battleMob
+    p = app.battlePlayer
+    nextPos = simpleGetNextPos((m.y, m.x), (p.y, p.x), m.d)
+    # make sure the mob goes away from the player kinda like a knockback or so the mob doesn't just stick on you
+    '''if app.counter - app.beenHitCounter <= 5 and app.beenHitCounter != 0:
+        nextPos = (nextPos[0] - 10, nextPos[1] - 10)'''
+    # nvm the mechanic isn't working out and I don't care
+    (m.y, m.x) = nextPos
+    if ((m.y - m.rad) < p.y < (m.y + m.rad) and 
+        (m.x - m.rad) < p.x < (m.x + m.rad)): # mob touches player
+        p.curHealth -= m.dmg
+        # same methods as above when you defeat it, but this time you
+        # also take damage. Perhaps I make a method for this too.
+        # have it be inside another function, maybe appStarted so I can
+        # use all the variables
+        app.player.money += app.battleMob.money
+        index = app.indexOfLastMobFought
+        m = app.mobList[index]
+        app.mobCoords.discard((m.y, m.x))
+        app.mobList.pop(index)
+        app.battleMobList.pop(index)
+        app.gameState = 'Travel'
+        app.paused = True
+        app.timerDelay = app.defaultTimer
 
-def moveDot(app):
-    app.x += app.dx
-    if (app.x < 0) or (app.x > app.width): app.dx = -app.dx
-    app.y += app.dy
-    if (app.y < 0) or (app.y > app.height): app.dy = -app.dy
+        #app.beenHitCounter = app.counter
 
-runApp(width=600, height=500)
+    
+    # change up the speed of the mob so it's not boring
+
+    if app.initialBMSpeed == app.battleMob.d:
+        a = random.randint(1, 5)
+        if a == 1 or a == 2:
+            app.battleMob.d *= 5
+            app.counter = 0
+    else:
+        if app.counter >= 5:
+            app.battleMob.d = app.initialBMSpeed
+
+def mobFight_mousePressed(app, event):
+    app.cx = event.x
+    app.cy = event.y
+    
+    tempY = app.battleMob.y
+    tempX = app.battleMob.x
+    tempRad = app.battleMob.rad
+
+    if ((tempY - tempRad) < app.cy < (tempY + tempRad) 
+        and (tempX - tempRad) < app.cx < (tempX + tempRad)): 
+        # if the mouse is on the mob
+        app.hitCounter += 1
+        app.combo += 1
+        app.dmgMult = max(app.combo // 8, 1) # this is so the dmg is never 0
+        app.battleMob.curHealth -= app.dmgMult * app.battlePlayer.dmg
+
+        # basically check if you killed the mob, maybe insert a little
+        # transition later
+        if app.battleMob.curHealth <= 0:
+            app.player.money += app.battleMob.money
+            index = app.indexOfLastMobFought
+            m = app.mobList[index]
+            app.mobCoords.discard((m.y, m.x))
+            app.mobList.pop(index)
+            app.battleMobList.pop(index)
+            app.gameState = 'Travel'
+            app.paused = True
+            app.timerDelay = app.defaultTimer
+
+    else:
+        # missed, so counter goes down
+        app.hitCounter -= 1
+        app.combo = 0
+        app.dmgMult = max(1, app.dmgMult - 1)
+
+def Travel_keyPressed(app, event):
+    lastCoords = (app.player.y, app.player.x)
+
+    if app.paused: app.paused = False
+    if (event.key == 'w' or event.key == 'Up'): app.player.y -= 1
+    if (event.key == 's' or event.key == 'Down'): app.player.y += 1
+    if (event.key == 'd' or event.key == 'Right'): app.player.x += 1
+    if (event.key == 'a' or event.key == 'Left'): app.player.x -= 1
+    if (event.key == 'p'): app.paused = not app.paused
+
+    # for debugging purposes
+    '''if (event.key == "Space"):
+        for i, mob in enumerate(app.mobList):
+            (mob.y, mob.x) = getNextPos((mob.y, mob.x), app.pLoc, app.gameMap)
+            print(i, mob.y, mob.x, app.pLoc)'''
+
+    # change player coords back if the space the players wants to move in is illegal
+    pY = app.player.getY()
+    pX = app.player.getX()
+    if (pY not in range(app.rows) or pX not in range(app.cols) or 
+        app.gameMap[pY][pX] == 0):
+        app.player.setY(lastCoords[0])
+        app.player.setX(lastCoords[1])
+    elif (pY, pX) in app.mobCoords: # player meets mob
+        app.gameState = 'mobFight'
+        app.timerDelay = 100
+        # somehow get the index of the mob in the list so you can pop it later
+        for i, m in enumerate(app.mobList):
+            if (m.y, m.x) == (pY, pX): # you know it's in there so no need for an else case
+                app.indexOfLastMobFought = i
+                app.battleMob = app.battleMobList[i]
+                app.initialBMSpeed = app.battleMob.d
+
+    # Check if player reached goal
+    elif (pY, pX) == app.gLoc:
+        app.level += 1
+        app.rows += 3 # change this number later
+        app.cols = app.rows
+        # now change all the variables that create the board and stuff as well as get new positions
+        app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
+            (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
+        app.numOfMobs += 1 # for this maybe don't have it increase all the time, maybe make a formula
+        # perhaps it's 2 + (level // 2) + something abt difficulty
+        # don't forget that we need to change the player location as well
+        app.player.y, app.player.x = app.pLoc
+        
+        # Essentially do all the stuff we did for the initializing thing
+        # Make a helper function that gets all this stuff for us because
+        # the code is super messy
+        app.sW = min(app.width / app.rows, app.boardHeight / app.rows)
+        app.boardHeight = 0.9 * app.height
+        app.mobListLoc = random.sample(mLocs, app.numOfMobs)
+        app.mobList = [Mob(m[1], m[0], app.sW / 3, 10, i) for i, m in enumerate(app.mobListLoc)]
+        app.mobCoords = {(i[0], i[1]) for i in app.mobListLoc}
+        app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.sW * 1.5, 2, 25, 100, 20) for i in app.mobList]
+        app.player.radius = app.sW / 3
+
+def mobFight_keyPressed(app, event):
+    p = app.battlePlayer
+    lastCoords = (p.y, p.x)
+    if (event.key == 'w' or event.key == 'Up'): p.y -= 10
+    if (event.key == 's' or event.key == 'Down'): p.y += 10
+    if (event.key == 'd' or event.key == 'Right'): p.x += 10
+    if (event.key == 'a' or event.key == 'Left'): p.x -= 10
+
+    # change player coords back if the space the players wants to move in is illegal
+    if (p.y < 0 or p.y > app.height or p.x < 0 or p.x > app.width):
+        p.y = lastCoords[0]
+        p.x = lastCoords[1]

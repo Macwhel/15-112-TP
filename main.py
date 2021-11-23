@@ -76,7 +76,7 @@ def appStarted(app):
 # clean up the code later
 
 def keyPressed(app, event):
-    if app.gameState == 'Travel':
+    if app.mode == 'Travel':
         lastCoords = (app.player.y, app.player.x)
 
         if app.paused: app.paused = False
