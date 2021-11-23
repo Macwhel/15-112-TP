@@ -1,8 +1,8 @@
 import random
 
-
-def createBoard(rows: int, cols: int) -> list:
-    return [[0] * cols for _ in range(rows)]
+# Don't need this
+'''def createBoard(rows: int, cols: int) -> list:
+    return [[0] * cols for _ in range(rows)]'''
 
 def getDirection(directions: list, lastDirection: list) -> list:
     dir = random.choice(directions)
@@ -24,7 +24,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
     rows, cols = dimensions[0], dimensions[1]
 
     # initialize the map
-    gameMap = createBoard(rows, cols)
+    gameMap = [[0] * cols for _ in range(rows)]
     
     # where we make our first tunnel (gotta start somewhere)
     curPos = (random.randint(0, rows - 1), random.randint(0, cols - 1))
@@ -85,3 +85,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
     return (gameMap, firstPos, goalPos, legalMobPos)
 
 
+# try to implement based on description, no outside pseudocode
+def Kruskals(dimensions: tuple) -> list:
+    
+    pass

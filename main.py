@@ -6,7 +6,30 @@ from mob import *
 from astar import *
 from gameInit import *
 
-# Screens method from lecture notes
+# Screens idea from lecture notes (not sure if I needed to cite this but I still am)
+# No code was copy pasted
+
+def gameOver_redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = "light blue")
+
+#########################################################
+
+def Shop_redrawAll(app, canvas):
+    # background
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = "light blue")
+
+    # show the player's health and money so they know what they should/can buy
+    p = app.player
+    canvas.create_text(app.width / 6, app.height - 10,
+                        text = f'Health: {int(p.curHealth)}', font = 'Arial 13 bold')
+    canvas.create_text(5 * app.width / 6, app.height - 10,
+                        text = f'Money: {p.money}', font = 'Arial 13 bold')
+    pass
+
+def Shop_mousePressed(app, event):
+    loc = (event.y, event.x)
+
+#########################################################
 
 def Travel_redrawAll(app, canvas):
     for i in range(len(app.gameMap)):
@@ -54,12 +77,15 @@ def Travel_redrawAll(app, canvas):
     canvas.create_line(0, border, app.boardHeight, border,
                         width = 3)
     canvas.create_line(border, 0, border, app.boardHeight, width = 3)
+
+    # draw the stuff I'll use later
     canvas.create_text(app.width / 6, app.height - 10,
                         text = f'Health: {int(p.curHealth)}', font = 'Arial 13 bold')
     canvas.create_text(5 * app.width / 6, app.height - 10,
                         text = f'Money: {p.money}', font = 'Arial 13 bold')
 
 def Travel_timerFired(app):
+    # get the next position for all mobs
     for i, mob in enumerate(app.mobList):
             pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
             if pos not in app.mobCoords:
@@ -121,6 +147,10 @@ def Travel_keyPressed(app, event):
         # don't forget that we need to change the player location as well
         app.player.y, app.player.x = app.pLoc
         
+        # give the player some breathing room
+        app.paused = True
+        game.Mode = "Shop"
+
         # Essentially do all the stuff we did for the initializing thing
         # Make a helper function that gets all this stuff for us because
         # the code is super messy
@@ -274,7 +304,7 @@ def appStarted(app):
 
     # initiliaze game states and variables: 
     '''Travel, Fight, etc.'''
-    app.mode = 'Travel'
+    app.mode = 'Shop'
     app.paused = False
     app.level = 0
 
