@@ -4,6 +4,7 @@ from map import *
 from rectangle import *
 from mob import *
 from astar import *
+from gameInit import *
 
 def appStartedHelper():
     pass
@@ -11,7 +12,7 @@ def appStartedHelper():
 def appStarted(app):
 
     # these are things that'll change depending on difficulty
-    # take stff from something
+    # take stuff from something
     app.rows, app.cols = (20, 20)
     numOfMobs = 3
     app.timerDelay = 250
@@ -36,7 +37,7 @@ def appStarted(app):
     # make a list of unique mob spawning locations
     app.mobListLoc = random.sample(mLocs, numOfMobs)
 
-    # create a dictionary of mob classes
+    # create a list of mob classes
     app.mobList = [Mob(i[1], i[0], app.sW / 3, 10) for i in app.mobListLoc]
 
     # have a set to keep track of the coords so the mobs don't overlap
@@ -56,7 +57,7 @@ def appStarted(app):
         100,
         100)
     
-    # need this for later
+    # put this in mob class
     app.initialBMSpeed = app.battleMob.d
     app.counter = 0
 
@@ -66,6 +67,7 @@ def appStarted(app):
         3,
         2)
 
+    # put this in player class
     app.hitCounter = 0
     app.beenHitCounter = 0
     app.combo = 0
