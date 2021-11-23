@@ -52,7 +52,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
     numTunsLeft = 0
 
     # this is needed to get the goal node
-    goalNodeIt = random.randint(0.75 * maxTuns, maxTuns)
+    goalNodeIt = random.randint(int(0.75 * maxTuns), maxTuns)
 
     # initialize list for legal mob positions
     legalMobPos = []
