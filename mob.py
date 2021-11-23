@@ -9,10 +9,10 @@ class Mob:
 
 class BattleMob:
 
-    def __init__(self, y, x, rad, d, curHealth, maxHealth):
+    def __init__(self, y, x, rad, d, maxHealth, money):
         self.y = y
         self.x = x
         self.rad = rad
         self.d = d
-        self.curHealth = curHealth
-        self.maxHealth = maxHealth
+        self.maxHealth = self.curHealth = maxHealth
+        self.money = money

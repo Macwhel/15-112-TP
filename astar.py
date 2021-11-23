@@ -1,7 +1,13 @@
 import queue
 import math
 
-#make a priority queue thing for more lines of code
+#make a priority queue method thing for more lines of code
+
+class PriorityQueue():
+    def __init__(self):
+        self.list1 = []
+        self.list2 = []
+
 
 # helper function for aStar
 def h(curPos: tuple, endPos: tuple) -> int:
@@ -10,6 +16,9 @@ def h(curPos: tuple, endPos: tuple) -> int:
 
 # Referenced wikipedia for pseudocode
 # https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
+# Referenced youtube videos for pseudocode 
+# https://youtu.be/-L-WgKMFuhE?t=481
+# https://www.youtube.com/watch?v=JtiK0DOeI4A
 
 def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
 
@@ -21,12 +30,12 @@ def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
 
     # a place to store our g and f values in case they need changing later
     # make sure to initialize the values of each spot to infinity
-    g_val = {(i, j) : float("inf") for i in range(len(gameMap)) for j in range(len(gameMap[0]))}
-    f_val = {(i, j) : float("inf") for i in range(len(gameMap)) for j in range(len(gameMap[0]))}
+    gVal = {(i, j) : float("inf") for i in range(len(gameMap)) for j in range(len(gameMap[0]))}
+    fVal = {(i, j) : float("inf") for i in range(len(gameMap)) for j in range(len(gameMap[0]))}
 
     # initialize the start g and f vals for future use
-    g_val[curPos] = 0
-    f_val[curPos] = h(curPos, endPos)
+    gVal[curPos] = 0
+    fVal[curPos] = h(curPos, endPos)
     
     # a place to check where a node came from (needed to retrace our steps)
     prevNode = {}
@@ -68,13 +77,13 @@ def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
                 legalNeighbors.append((newY, newX))
 
         for nei in legalNeighbors:
-            tempGScore = g_val[cur] + 1
-            if tempGScore < g_val[nei]:
-                g_val[nei] = tempGScore
+            tempGScore = gVal[cur] + 1
+            if tempGScore < gVal[nei]:
+                gVal[nei] = tempGScore
                 prevNode[nei] = cur
-                f_val[nei] = g_val[nei] + h(nei, endPos)
+                fVal[nei] = gVal[nei] + h(nei, endPos)
                 if nei not in visited:
-                    q.put((f_val[nei], nei))
+                    q.put((fVal[nei], nei))
                     visited.add(nei)
     return curPos
 
