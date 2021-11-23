@@ -71,7 +71,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
                 lenOfCurTun += 1
                 curPos = (r, c)
                 if numTunsLeft > 0.5 * maxTuns:
-                    legalMobPos.append(curPos)
+                    if firstPos != curPos: legalMobPos.append(curPos)
                 gameMap[r][c] = 7
         if lenOfCurTun >= 1:
             numTunsLeft += 1

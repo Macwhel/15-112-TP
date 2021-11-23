@@ -230,6 +230,7 @@ def Travel_keyPressed(app, event):
         app.player.radius = app.sW / 3
 
 def mobFight_keyPressed(app, event):
+
     p = app.battlePlayer
     lastCoords = (p.y, p.x)
     if (event.key == 'w' or event.key == 'Up'): p.y -= 10
@@ -241,3 +242,5 @@ def mobFight_keyPressed(app, event):
     if (p.y < 0 or p.y > app.height or p.x < 0 or p.x > app.width):
         p.y = lastCoords[0]
         p.x = lastCoords[1]
+
+
