@@ -1,11 +1,12 @@
 class Player:
-    def __init__(self, y, x, radius, health = 0, dmg = 0):
+    def __init__(self, y, x, radius, money, health = 100, dmg = 0):
         self.x = x
         self.y = y
         self.color = 'yellow'
         self.radius = radius
-        self.health = health
+        self.maxHealth = self.curHealth = health
         self.dmg = dmg
+        self.money = money
 
 
     def setY(self, newY):

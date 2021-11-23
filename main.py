@@ -15,8 +15,8 @@ def appStarted(app):
     # take stuff from something
     app.rows, app.cols = (20, 20)
     numOfMobs = 3
-    app.timerDelay = 250
-    battleMobHealth = 100
+    app.timerDelay = app.defaultTimer = 250
+
 
     # make it relative to window size
     app.sW = min(app.width / app.rows, app.height / app.rows)
@@ -26,13 +26,14 @@ def appStarted(app):
     app.Travel = True
     app.mobFight = False
     app.bossFight = False
+    app.paused = False
 
     # initilalize map and then get start locations for player and end goal as
     # well as acceptable mob locations
     # Adjust maxTuns and maxLen scalings on difficulty****
     app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
         (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
-    app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3)
+    app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3, 0)
     
     # make a list of unique mob spawning locations
     app.mobListLoc = random.sample(mLocs, numOfMobs)
@@ -49,23 +50,18 @@ def appStarted(app):
     # the battle starts from left if that makes sense. From top then top and bottom,
     # bottom then bottom top
     # change size of mob depending on difficulty as well
-    app.battleMob = BattleMob(
-        app.height / 4, 
-        app.width / 2, 
-        app.sW * 1.5,
-        2,
-        100,
-        100)
+    # later change the battlemob based on difficulty parameters
+    app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.sW * 1.5, 2, 1, 100) for i in app.mobList]
+
+    
     
     # put this in mob class
     app.initialBMSpeed = app.battleMob.d
+    # need this for later
     app.counter = 0
+    
 
-    app.battlePlayer = Player(
-        3 * app.height / 4, app.width / 2, 
-        app.sW, 
-        3,
-        2)
+    app.battlePlayer = Player(3 * app.height / 4, app.width / 2, app.sW, 0, 3, 2)
 
     # put this in player class
     app.hitCounter = 0
@@ -76,15 +72,18 @@ def appStarted(app):
     # initialize mouse pressed locations
     app.cx = app.cy = 0
 
+# clean up the code
 
 def keyPressed(app, event):
     if app.Travel:
         lastCoords = (app.player.y, app.player.x)
 
+        if app.paused: app.paused = False
         if (event.key == 'Up'): app.player.y -= 1
         if (event.key == 'Down'): app.player.y += 1
         if (event.key == 'Right'): app.player.x += 1
         if (event.key == 'Left'): app.player.x -= 1
+        if (event.key == 'p'): app.paused = not app.paused
 
         # for debugging purposes
         '''if (event.key == "Space"):
@@ -106,6 +105,7 @@ def keyPressed(app, event):
             pass
 
     elif app.mobFight:
+        lastCoords = (app.player.y, app.player.x)
 
         if (event.key == 'Up'): app.battlePlayer.y -= 10
         if (event.key == 'Down'): app.battlePlayer.y += 10
@@ -134,9 +134,20 @@ def mousePressed(app, event):
             # if the mouse is on the mob
             app.hitCounter += 1
             app.combo += 1
-            app.dmgMult = max(app.combo // 10, 1)
+            app.dmgMult = max(app.combo // 8, 1)
             app.battleMob.curHealth -= app.dmgMult * app.battlePlayer.dmg
-            
+            print(app.battleMob.curHealth, app.dmgMult, app.battlePlayer.dmg)
+
+            # basically check if you killed the mob, maybe insert a little
+            # transition later
+            if app.battleMob.curHealth <= 0:
+                app.player.money += app.battleMob.money
+                app.mobList.pop(app.indexOfLastMobFought)
+                app.mobFight = False
+                app.Travel = True
+                app.paused = True
+                app.timerDelay = app.defaultTimer
+
         else:
             app.hitCounter -= 1
             app.combo = 0
@@ -147,17 +158,22 @@ def timerFired(app):
     # change the coords of every mob if a mob isn't in there already
     app.counter += 1
 
-    if app.Travel:
-        for mob in app.mobList:
+    if app.Travel and not app.paused:
+        for i, mob in enumerate(app.mobList):
             pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
             if pos not in app.mobCoords:
                 app.mobCoords.discard((mob.y, mob.x))
                 (mob.y, mob.x) = pos
                 app.mobCoords.add(pos)
+
+            # Mob meets player, begin fight
             elif pos == app.player.loc():
                 app.mobFight = True
                 app.Travel = False
                 app.timerDelay = 100
+                app.indexOfLastMobFought = i
+                app.battleMob = app.battleMobList[i]
+                app.initialBMSpeed = app.battleMob.d
 
     elif app.mobFight:
         m = app.battleMob
@@ -167,6 +183,8 @@ def timerFired(app):
             (m.x - m.rad) < p.x < (m.x + m.rad)): # mob touches player
             app.beenHitCounter += 1
         
+        # change up the speed of the mob so it's not boring
+
         if app.initialBMSpeed == app.battleMob.d:
             a = random.randint(1, 9)
             if a == 3 or a == 2:
@@ -241,13 +259,13 @@ def redrawAll(app, canvas):
             fill = "yellow"
         )
     
-        canvas.create_text(app.width / 10, app.height / 10,
-                            text = f'{app.dmgMult}x', font = 'Arial 20 bold')
-        canvas.create_text(9 * app.width / 10, app.height / 10,
-                            text = f'{app.beenHitCounter}', font = 'Arial 20 bold')
+        canvas.create_text(app.width / 4, app.height / 9,
+                            text = f'Dmg Multiplier: {app.dmgMult}x', font = 'Arial 13 bold')
+        canvas.create_text(3 * app.width / 4, app.height / 9,
+                            text = f'Health Left: {((p.curHealth / p.maxHealth) * 100):.2f}%', font = 'Arial 13 bold')
 
-        canvas.create_text(app.width / 2, app.height / 10,
-                            text = f'Health: {((m.curHealth / m.maxHealth) * 100):.2f}%')
+        canvas.create_text(app.width / 2, app.height / 20,
+                            text = f'Mob Health: {((m.curHealth / m.maxHealth) * 100):.2f}%')
     elif app.bossFight:
         pass
 
