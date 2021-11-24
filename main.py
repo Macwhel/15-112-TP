@@ -7,11 +7,34 @@ from astar import *
 from gameInit import *
 
 
-# Screens idea from lecture notes (not sure if I needed to cite this but I still am)
+# Screens concept from lecture notes (not sure if I needed to cite this but better safe than sorry)
 # No code was copy pasted
 
-def gameOver_redrawAll(app, canvas):
+def pause_redrawAll(app, canvas):
+    # make sure all the variables were saved so that when you "unpause," the 
+    pass
+
+#########################################################
+
+def tutorial_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill = "light blue")
+
+    canvas.create_text(app.width / 2, app.height / 6, text = 'Basic Rules:', font = "Cambria 32 bold")
+
+def tutorial_keyPressed(app, event):
+    if event.key == 'Right': app.mode = 'tutorial1'
+    if event.key == "Space": app.mode = 'Travel'
+
+def tutorial_mousePressed(app, event):
+    loc = (event.y, event.x)
+    
+    # if it ever clicks on this on this one part of the screen, then go straight to the game
+    app.mode = 'Travel'
+
+#########################################################
+
+def gameOver_redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = "red")
 
 #########################################################
 
@@ -19,16 +42,32 @@ def Shop_redrawAll(app, canvas):
     # background
     canvas.create_rectangle(0, 0, app.width, app.height, fill = "light blue")
 
+    canvas.create_text(app.width / 2, app.height / 20, text = f'Level {app.level} Completed', font = "Cambria 32 bold")
+    canvas.create_text(app.width / 2, app.height / 8, text = 'Shop', font = "Cambria 20 bold")
+
     # show the player's health and money so they know what they should/can buy
     p = app.player
     canvas.create_text(app.width / 6, app.height - 10,
-                        text = f'Health: {int(p.curHealth)}', font = 'Arial 13 bold')
+                        text = f'Health: {int(p.curHealth)}', font = 'Cambria 13 bold')
     canvas.create_text(5 * app.width / 6, app.height - 10,
-                        text = f'Money: {p.money}', font = 'Arial 13 bold')
+                        text = f'Money: {p.money}', font = 'Cambria 13 bold')
+    
+    
+
+    # Damage Items
+    canvas.create_text(app.width / 6, app.height / 5, text = "Damage:", font = "Cambria 16 bold")
+
+    # Survivability items (health, defense)
+    canvas.create_text(app.width / 2, app.height / 5, text = "Survivability:", font = "Cambria 16 bold")
+
+    canvas.create_text(5 * app.width / 6, app.height / 5, text = "Misc:", font = "Cambria 16 bold")
     pass
 
 def Shop_mousePressed(app, event):
     loc = (event.y, event.x)
+
+'''def Shop_keyPressed(app, event):
+    if event.key == "space":'''
 
 #########################################################
 
@@ -81,9 +120,9 @@ def Travel_redrawAll(app, canvas):
 
     # draw the stuff I'll use later
     canvas.create_text(app.width / 6, app.height - 10,
-                        text = f'Health: {int(p.curHealth)}', font = 'Arial 13 bold')
+                        text = f'Health: {int(p.curHealth)}', font = 'Cambria 13 bold')
     canvas.create_text(5 * app.width / 6, app.height - 10,
-                        text = f'Money: {p.money}', font = 'Arial 13 bold')
+                        text = f'Money: {p.money}', font = 'Cambria 13 bold')
 
 def Travel_timerFired(app):
     # get the next position for all mobs
@@ -150,7 +189,7 @@ def Travel_keyPressed(app, event):
         
         # give the player some breathing room
         app.paused = True
-        game.Mode = "Shop"
+        app.mode = "Shop"
 
         # Essentially do all the stuff we did for the initializing thing
         # Make a helper function that gets all this stuff for us because
@@ -177,13 +216,15 @@ def mobFight_timerFired(app):
     (m.y, m.x) = nextPos
     if ((m.y - m.rad) < p.y < (m.y + m.rad) and 
         (m.x - m.rad) < p.x < (m.x + m.rad)): # mob touches player
-        p.curHealth -= m.dmg
-        app.player.curHealth -= m.dmg
+        dmgDealt = max((m.dmg - p.defense), 0)
+        p.curHealth -= dmgDealt
+        app.player.curHealth -= dmgDealt
+        if app.player.curHealth <= 0:
+            app.mode = 'gameOver'
         # same methods as above when you defeat it, but this time you
         # also take damage. Perhaps I make a method for this too.
         # have it be inside another function, maybe appStarted so I can
         # use all the variables
-        app.player.money += app.battleMob.money
         index = app.indexOfLastMobFought
         m = app.mobList[index]
         app.mobCoords.discard((m.y, m.x))
@@ -278,9 +319,9 @@ def mobFight_redrawAll(app, canvas):
     )
 
     canvas.create_text(app.width / 4, app.height / 9,
-                        text = f'Dmg Multiplier: {app.dmgMult}x', font = 'Arial 13 bold')
+                        text = f'Dmg Multiplier: {app.dmgMult}x', font = 'Cambria 13 bold')
     canvas.create_text(3 * app.width / 4, app.height / 9,
-                        text = f'Health Left: {int(p.curHealth)}', font = 'Arial 13 bold')
+                        text = f'Health Left: {int(p.curHealth)}', font = 'Cambria 13 bold')
     canvas.create_text(app.width / 2, app.height / 20,
                         text = f'Mob Health: {((m.curHealth / m.maxHealth) * 100):.2f}%')
 
@@ -293,9 +334,10 @@ def appStarted(app):
 
     # these are things that'll change depending on difficulty
     # take stuff from something
-    app.rows, app.cols = (10, 10)
-    app.numOfMobs = 1
+    app.rows, app.cols = (20, 20)
+    app.numOfMobs = max((app.rows**2) // 100, 1)
     app.timerDelay = app.defaultTimer = 250
+    app.items = dict()
 
     # have the board use different height measurements
     app.boardHeight = 0.9 * app.height
@@ -305,9 +347,9 @@ def appStarted(app):
 
     # initiliaze game states and variables: 
     '''Travel, Fight, etc.'''
-    app.mode = 'Shop'
+    app.mode = 'tutorial'
     app.paused = False
-    app.level = 0
+    app.level = 1
 
     # initilalize map and then get start locations for player and end goal as
     # well as acceptable mob locations
@@ -332,7 +374,7 @@ def appStarted(app):
     # bottom then bottom top
     # change size of mob depending on difficulty as well
     # later change the battlemob based on difficulty parameters
-    app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.sW * 1.5, 2, 25, 100, 20) for i in app.mobList]
+    app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.sW * 1.5, app.level * 2, 25, 100, 20) for i in app.mobList]
 
     
     
@@ -361,4 +403,4 @@ def appStarted(app):
 
 
 if __name__ == "__main__":
-    runApp(width = 400, height = 400)
+    runApp(width = 800, height = 800)
