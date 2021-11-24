@@ -221,6 +221,8 @@ def mobFight_timerFired(app):
         app.player.curHealth -= dmgDealt
         if app.player.curHealth <= 0:
             app.mode = 'gameOver'
+        elif app.player.curHealth <= 20:
+            app.player.dmg *= 2
         # same methods as above when you defeat it, but this time you
         # also take damage. Perhaps I make a method for this too.
         # have it be inside another function, maybe appStarted so I can
