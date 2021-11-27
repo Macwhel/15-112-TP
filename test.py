@@ -56,10 +56,9 @@ print(paths[0])'''
 
 while len(paths) > 1:
     # 1
-    # getting random method idea from stack overflow
-    # https://stackoverflow.com/questions/44605255/what-is-the-most-pythonic-way-to-pop-a-random-element-from-a-set-in-python3-6
-    loc = random.sample(locations, 1)[0]
-    locations.discard(loc)
+
+    a = random.choice(paths)
+    loc = random.sample(a, 1)[0]
     print(loc)
     # 2
     newLoc = False
@@ -75,7 +74,7 @@ while len(paths) > 1:
             for i, path in enumerate(paths):
                 if newLoc in path:
                     indexOfNewLoc = i
-                elif loc in path:
+                if loc in path:
                     indexOfLoc = i
                 
                 # no need to keep on going if you find the position
@@ -83,6 +82,7 @@ while len(paths) > 1:
                     break
             # 3a
             if indexOfNewLoc == indexOfLoc:
+                print("Don't do anything")
                 break # it's in the same path, get a new direction
 
             # 3b: otherwise, it's legal
@@ -93,6 +93,7 @@ while len(paths) > 1:
             midY = loc[0] + (d[0] // 2)
             midX = loc[1] + (d[1] // 2)
             print(loc, newLoc, (midY, midX))
+            print(indexOfLoc, indexOfNewLoc)
             board[midY][midX] = 1
 
             break
@@ -113,29 +114,3 @@ while len(paths) > 1:
 
 
 
-
-
-'''while len(paths) > 1:
-    # 1
-    index = random.randrange(len(paths))
-
-    # 1a
-
-<<<<<<< HEAD
-    if len(paths[index] > 1):
-        index2 = random.randrange(len(paths[index]))
-=======
-# get a random cell
-# connect it with another cell
-
-r, c = random.randrange(rows), random.randrange(cols)
-
-
->>>>>>> ce1ef08a26cb427eeaa889cd02096c04701c6dd4
-
-    loc = paths[index][index2]
-
-    # 2
-    random.shuffle(directions)
-    for d in directions:
-        newLoc = '''
