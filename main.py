@@ -67,7 +67,7 @@ def Shop_mousePressed(app, event):
     loc = (event.y, event.x)
 
 def Shop_keyPressed(app, event):
-    if event.key == "space":
+    if event.key == "Space":
         app.mode = 'Travel'
 
 #########################################################
@@ -127,20 +127,21 @@ def Travel_redrawAll(app, canvas):
 
 def Travel_timerFired(app):
     # get the next position for all mobs
-    for i, mob in enumerate(app.mobList):
-            pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
-            if pos not in app.mobCoords:
-                app.mobCoords.discard((mob.y, mob.x))
-                (mob.y, mob.x) = pos # update the mob's position
-                app.mobCoords.add(pos) # update the set as well
+    if not app.paused:
+        for i, mob in enumerate(app.mobList):
+                pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
+                if pos not in app.mobCoords:
+                    app.mobCoords.discard((mob.y, mob.x))
+                    (mob.y, mob.x) = pos # update the mob's position
+                    app.mobCoords.add(pos) # update the set as well
 
-            # Mob meets player
-            elif pos == app.player.loc():
-                app.mode = 'mobFight'
-                app.timerDelay = 100
-                app.indexOfLastMobFought = i
-                app.battleMob = app.battleMobList[i]
-                app.initialBMSpeed = app.battleMob.d
+                # Mob meets player
+                elif pos == app.player.loc():
+                    app.mode = 'mobFight'
+                    app.timerDelay = 100
+                    app.indexOfLastMobFought = i
+                    app.battleMob = app.battleMobList[i]
+                    app.initialBMSpeed = app.battleMob.d
 
 def Travel_keyPressed(app, event):
     lastCoords = (app.player.y, app.player.x)
@@ -181,8 +182,15 @@ def Travel_keyPressed(app, event):
         app.rows += 3 # change this number later
         app.cols = app.rows
         # now change all the variables that create the board and stuff as well as get new positions
-        app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
-            (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
+        mapType = randomMap()
+        if mapType == "Kruskals":
+            app.gameMap, app.pLoc, app.gLoc, mLocs = Kruskals((app.rows, app.cols))
+        else:
+            app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
+                (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
+        for row in app.gameMap:
+            print(row)
+        print(app.pLoc, app.gLoc)
         app.numOfMobs += 1 # for this maybe don't have it increase all the time, maybe make a formula
         # perhaps it's 2 + (level // 2) + something abt difficulty
         # don't forget that we need to change the player location as well
@@ -337,8 +345,9 @@ def appStarted(app):
 
     # these are things that'll change depending on difficulty
     # take stuff from something
-    app.rows, app.cols = (20, 20)
+    app.rows, app.cols = (25, 25)
     app.numOfMobs = max((app.rows**2) // 100, 1)
+    app.numOfMobs = 3
     app.timerDelay = app.defaultTimer = 250
     app.items = dict()
 
@@ -353,14 +362,20 @@ def appStarted(app):
     app.mode = 'tutorial'
     app.paused = False
     app.level = 1
+    mapType = randomMap()
 
     # initilalize map and then get start locations for player and end goal as
     # well as acceptable mob locations
     # Adjust maxTuns and maxLen scalings on difficulty****
-    app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
-        (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
+    if mapType == "Kruskals":
+        app.gameMap, app.pLoc, app.gLoc, mLocs = Kruskals((app.rows, app.cols))
+    else:
+        app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
+            (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 1.5)
+    for row in app.gameMap:
+        print(row)
+    print(app.pLoc, app.gLoc)
     app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3, 0)
-    
     # make a list of unique mob spawning locations
     app.mobListLoc = random.sample(mLocs, app.numOfMobs)
 

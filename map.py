@@ -1,10 +1,11 @@
 import random
+import copy
 
 # Don't need this
 '''def createBoard(rows: int, cols: int) -> list:
     return [[0] * cols for _ in range(rows)]'''
 
-def getDirection(directions: list, lastDirection: list) -> list:
+def getDirection(directions: list, lastDirection: list) -> tuple:
     dir = random.choice(directions)
     while dir == lastDirection or (dir[0] == -lastDirection[0] and dir[1] == -lastDirection[1]):
         dir = random.choice(directions)
@@ -12,6 +13,9 @@ def getDirection(directions: list, lastDirection: list) -> list:
 
 # utilizes a random walker algorithm for map generation 
 # (https://www.freecodecamp.org/news/how-to-make-your-own-procedural-dungeon-map-generator-using-the-random-walk-algorithm-e0085c8aa9a/)
+
+def randomMap() -> str:
+    return random.choice(["Kruskals", "Random Walker"])
 
 def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
 
@@ -89,10 +93,23 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
 # utilized 4 slides/pictures
 # http://www.jamisbuck.org/presentations/rubyconf2011/index.html#kruskals
 def Kruskals(dimensions: tuple) -> list:
+
+    # init variables
     rows, cols = dimensions
-    r1 = [1 if i % 2 == 0 else 0 for i in range(cols)]
+
+    # keep it simple, make firstPos in the center
+    cent = (rows // 2) if ((rows // 2) % 2 == 0) else ((rows // 2) + 1)
+    firstPos = (cent, cent)
+
+    edge = (rows - 1) if ((rows - 1) % 2 == 0) else (rows - 2)
+    # make goal pos in the corner
+    goalPos = random.choice([(0,0), (0, edge), (edge, 0), (edge, edge)])
+    legalMobPos = []
+
+    r1 = [7 if i % 2 == 0 else 0 for i in range(cols)]
     r2 = [0 for i in range(cols)]
     
+    # init board
     board = [copy.deepcopy(r1) if i % 2 == 0 else copy.deepcopy(r2) for i in range(rows)]
 
     directions = [
@@ -104,22 +121,16 @@ def Kruskals(dimensions: tuple) -> list:
 
     paths = [{(i, j)} for j in range(0, cols, 2) for i in range(0, rows, 2)]
 
-    # 1: choose a random 1
-
+    # 1: choose a random cell that is a path
     # 2: randomly get the directions
-
     # 3: if there's something that's not connected, (aka there's a 0 in between)
-
     # 3a: check if it's in the set that this location is also in
-
     # if so, check another direction and repeat from 3
-
     # 3b: if it's not, add it to the set
-
     # 4: update the board
+    # 5: keep it going until len of the set is 1
 
-    # keep it going until len of the set is 1
-
+    # 5
     while len(paths) > 1:
         # 1
 
@@ -156,10 +167,14 @@ def Kruskals(dimensions: tuple) -> list:
                 # 4
                 midY = loc[0] + (d[0] // 2)
                 midX = loc[1] + (d[1] // 2)
-                board[midY][midX] = 1
+                board[midY][midX] = 7
+
+                # add a mob to this tile if it's not right next to char
+                if abs(firstPos[0] - midY) > 2 and abs(firstPos[1] - midX) > 2:
+                    legalMobPos.append((midY, midX))
 
                 break
-            
-    return board
+    # (gameMap, firstPos, goalPos, legalMobPos)
+    return board, firstPos, goalPos, legalMobPos
 
 
