@@ -121,8 +121,17 @@ while len(paths) > 1:
 
     # 1a
 
+<<<<<<< HEAD
     if len(paths[index] > 1):
         index2 = random.randrange(len(paths[index]))
+=======
+# get a random cell
+# connect it with another cell
+
+r, c = random.randrange(rows), random.randrange(cols)
+
+
+>>>>>>> ce1ef08a26cb427eeaa889cd02096c04701c6dd4
 
     loc = paths[index][index2]
 

@@ -66,8 +66,9 @@ def Shop_redrawAll(app, canvas):
 def Shop_mousePressed(app, event):
     loc = (event.y, event.x)
 
-'''def Shop_keyPressed(app, event):
-    if event.key == "space":'''
+def Shop_keyPressed(app, event):
+    if event.key == "space":
+        app.mode = 'Travel'
 
 #########################################################
 
