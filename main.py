@@ -188,9 +188,9 @@ def Travel_keyPressed(app, event):
         else:
             app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
                 (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
-        for row in app.gameMap:
+        '''for row in app.gameMap:
             print(row)
-        print(app.pLoc, app.gLoc)
+        print(app.pLoc, app.gLoc, app.mLocs)'''
         app.numOfMobs += 1 # for this maybe don't have it increase all the time, maybe make a formula
         # perhaps it's 2 + (level // 2) + something abt difficulty
         # don't forget that we need to change the player location as well
@@ -363,12 +363,15 @@ def appStarted(app):
     app.paused = False
     app.level = 1
     mapType = randomMap()
+    mapType = 'KruskalsWeave'
 
     # initilalize map and then get start locations for player and end goal as
     # well as acceptable mob locations
     # Adjust maxTuns and maxLen scalings on difficulty****
     if mapType == "Kruskals":
         app.gameMap, app.pLoc, app.gLoc, mLocs = Kruskals((app.rows, app.cols))
+    elif mapType == 'KruskalsWeave':
+        app.gameMap, app.pLoc, app.gLoc, mLocs = KruskalsWeave((app.rows,app.cols))
     else:
         app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
             (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 1.5)
