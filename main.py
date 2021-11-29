@@ -121,7 +121,7 @@ def Travel_redrawAll(app, canvas):
 
     # draw the stuff I'll use later
     canvas.create_text(app.width / 6, app.height - 10,
-                        text = f'Health: {int(p.curHealth)}', font = 'Cambria 13 bold')
+                        text = f'Health: {int(p.curHealth)} / {int(p.maxHealth)}', font = 'Cambria 13 bold')
     canvas.create_text(5 * app.width / 6, app.height - 10,
                         text = f'Money: {p.money}', font = 'Cambria 13 bold')
 
@@ -332,7 +332,7 @@ def mobFight_redrawAll(app, canvas):
     canvas.create_text(app.width / 4, app.height / 9,
                         text = f'Dmg Multiplier: {app.dmgMult}x', font = 'Cambria 13 bold')
     canvas.create_text(3 * app.width / 4, app.height / 9,
-                        text = f'Health Left: {int(p.curHealth)}', font = 'Cambria 13 bold')
+                        text = f'Health: {int(p.curHealth)} / {int(p.maxHealth)}', font = 'Cambria 13 bold')
     canvas.create_text(app.width / 2, app.height / 20,
                         text = f'Mob Health: {((m.curHealth / m.maxHealth) * 100):.2f}%')
 
