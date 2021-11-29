@@ -235,9 +235,10 @@ def KruskalsWeave(dimensions: tuple) -> list:
 
         if not(2 <= locX < (cols - 2) and 2 <= locY < (rows - 2)): continue
 
-        for i in range(-2, 3, 4):
+        for i in range(-2, 3, 2):
             # -2, 2
-            if (board[locX - i][locY] != 7 or board[locX][locY - i] != 7):
+            if (board[locX - i][locY] == 8 or board[locX - i][locY] == 9 or 
+                board[locX][locY - i] == 8 or board[locX][locY - i] == 9):
                 isLegal = False
                 break
 

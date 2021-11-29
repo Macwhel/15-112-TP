@@ -87,6 +87,13 @@ def Travel_redrawAll(app, canvas):
 
                 canvas.create_rectangle(cell.x, cell.y, cell.x2, cell.y2, fill = 
                                         cell.color, width = 0)
+
+                if app.gameMap[i][j] == 9:
+                    canvas.create_line(cell.x, cell.y, cell.x, cell.y2, width = 3)
+                    canvas.create_line(cell.x2, cell.y, cell.x2, cell.y2, width = 6)
+                elif app.gameMap[i][j] == 8:
+                    canvas.create_line(cell.x, cell.y, cell.x2, cell.y, width = 3)
+                    canvas.create_line(cell.x, cell.y2, cell.x2, cell.y2, width = 6)
     p = app.player
 
     # coords for player
@@ -129,6 +136,9 @@ def Travel_timerFired(app):
     # get the next position for all mobs
     if not app.paused:
         for i, mob in enumerate(app.mobList):
+                if (h((mob.y, mob.x), (app.player.y, app.player.x)) >= 10 and
+                    h((app.gLoc[0], app.gLoc[1]),(app.player.y, app.player.x)) >= 20):
+                    continue
                 pos = getNextPos((mob.y, mob.x), (app.player.y, app.player.x), app.gameMap)
                 if pos not in app.mobCoords:
                     app.mobCoords.discard((mob.y, mob.x))
@@ -153,6 +163,8 @@ def Travel_keyPressed(app, event):
     if (event.key == 'a' or event.key == 'Left'): app.player.x -= 1
     if (event.key == 'p'): app.paused = not app.paused
 
+    moveY, moveX = app.player.y - lastCoords[0], app.player.x - lastCoords[1]
+
     # for debugging purposes
     '''if (event.key == "Space"):
         for i, mob in enumerate(app.mobList):
@@ -166,6 +178,9 @@ def Travel_keyPressed(app, event):
         app.gameMap[pY][pX] == 0):
         app.player.setY(lastCoords[0])
         app.player.setX(lastCoords[1])
+    elif (app.gameMap[pY][pX] == 8 or app.gameMap[pY][pX] == 9): # force the player up/down and left/right
+        app.player.y += moveY
+        app.player.x += moveX
     elif (pY, pX) in app.mobCoords: # player meets mob
         app.mode = 'mobFight'
         app.timerDelay = 100
@@ -185,6 +200,8 @@ def Travel_keyPressed(app, event):
         mapType = randomMap()
         if mapType == "Kruskals":
             app.gameMap, app.pLoc, app.gLoc, mLocs = Kruskals((app.rows, app.cols))
+        elif mapType == 'KruskalsWeave':
+            app.gameMap, app.pLoc, app.gLoc, mLocs = KruskalsWeave((app.rows, app.cols))
         else:
             app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
                 (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)

@@ -43,10 +43,11 @@ def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
     # have a set for visited nodes
     visited = set(curPos)
 
+    # did not follow pseudocode from here (didn't like the ways I found online)
     while not q.empty():
 
         # get the position of the item with the lowest f-value
-        #print(q.get())
+        # print(q.get())
         cur = q.get()[1]
 
         # if we reach the end
@@ -73,7 +74,7 @@ def aStar(curPos: tuple, endPos: tuple, gameMap: list) -> list:
             newX = cur[1] + c
 
             if (newY in range(len(gameMap)) and newX in range(len(gameMap[0]))
-                and gameMap[newY][newX] == 7):
+                and gameMap[newY][newX] != 0):
                 legalNeighbors.append((newY, newX))
 
         for nei in legalNeighbors:

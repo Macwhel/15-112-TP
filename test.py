@@ -30,9 +30,9 @@ def KruskalsWeave(dimensions: tuple) -> list:
 
     paths = [{(i, j)} for j in range(0, cols, 2) for i in range(0, rows, 2)]
 
-    '''print(paths, len(paths))
+    print(paths, len(paths))
     for r in board:
-        print(r)'''
+        print(r)
 
     # 1: choose a random cell that is a path
     # 2: randomly get the directions
@@ -59,9 +59,10 @@ def KruskalsWeave(dimensions: tuple) -> list:
 
         if not(2 <= locX < (cols - 2) and 2 <= locY < (rows - 2)): continue
 
-        for i in range(-2, 3, 4):
+        for i in range(-2, 3, 2):
             # -2, 2
-            if (board[locX - i][locY] != 7 or board[locX][locY - i] != 7):
+            if (board[locX - i][locY] == 8 or board[locX - i][locY] == 9 or 
+                board[locX][locY - i] == 8 or board[locX][locY - i] == 9):
                 isLegal = False
                 break
 
@@ -127,9 +128,9 @@ def KruskalsWeave(dimensions: tuple) -> list:
 
             paths.pop(inLoc)
 
-            '''print(paths, len(paths))
+            print(paths, len(paths))
             for r in board:
-                print(r)'''
+                print(r)
 
     # 5
     while len(paths) > 1:
@@ -164,9 +165,9 @@ def KruskalsWeave(dimensions: tuple) -> list:
                 # 3b: otherwise, it's legal
                 paths[indexOfLoc] = paths[indexOfLoc].union(paths[indexOfNewLoc])
                 paths.pop(indexOfNewLoc)
-                '''print(paths, len(paths))
+                print(paths, len(paths))
                 for r in board:
-                    print(r)'''
+                    print(r)
 
                 # 4
                 midY = loc[0] + (d[0] // 2)
@@ -181,4 +182,6 @@ def KruskalsWeave(dimensions: tuple) -> list:
 
     # (gameMap, firstPos, goalPos, legalMobPos)
     return board, firstPos, goalPos, legalMobPos
+
+b,f,g,l = KruskalsWeave((6,6))
 
