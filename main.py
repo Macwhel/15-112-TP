@@ -535,7 +535,7 @@ def initGame(app):
     app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3)
 
     # make a list of unique mob spawning locations
-    app.mobListLoc = random.sample(mLocs, app.numOfMobs)
+    app.mobListLoc = random.sample(mLocs, min(len(mLocs), app.numOfMobs)) # fix this
 
     # create a list of mob classes for travel board
     app.mobList = [Mob(m[1], m[0], app.sW / 3, 10, i) for i, m in enumerate(app.mobListLoc)]

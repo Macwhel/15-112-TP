@@ -1,9 +1,6 @@
 import random
 import copy
 
-# Don't need this
-'''def createBoard(rows: int, cols: int) -> list:
-    return [[0] * cols for _ in range(rows)]'''
 
 def getDirection(directions: list, lastDirection: list) -> tuple:
     dir = random.choice(directions)
@@ -57,6 +54,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
 
     # this is needed to get the goal node
     goalNodeIt = random.randint(int(0.75 * maxTuns), maxTuns)
+    goalPos = (-1, -1)
 
     # initialize list for legal mob positions
     legalMobPos = []
@@ -83,8 +81,16 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
         if goalNodeIt >= 1:
             goalNodeIt -= 1
         else:
-            goalPos = (r,c) # there's something wrong here in determining the goal pos
+            if r in range(rows) or c in range(cols):
+                goalPos = (r,c) # there's something wrong here in determining the goal pos
         lastDir = dir
+
+    if goalPos == (-1, -1):
+        # find a goal pos
+        for r, row in enumerate(gameMap):
+            for c, pos in enumerate(row):
+                if pos == 7 and (r, c) != firstPos:
+                    goalPos = (r, c)
 
     return (gameMap, firstPos, goalPos, legalMobPos)
 
