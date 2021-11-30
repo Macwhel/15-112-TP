@@ -83,7 +83,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
         if goalNodeIt >= 1:
             goalNodeIt -= 1
         else:
-            goalPos = (r,c)
+            goalPos = (r,c) # there's something wrong here in determining the goal pos
         lastDir = dir
 
     return (gameMap, firstPos, goalPos, legalMobPos)

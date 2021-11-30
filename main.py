@@ -5,14 +5,46 @@ from rectangle import *
 from mob import *
 from astar import *
 from gameInit import *
+from items import *
 
 
 # Screens concept from lecture notes (not sure if I needed to cite this but better safe than sorry)
 # No code was copy pasted
 
+def startScreen_redrawAll(app, canvas):
+    canvas.create_text(app.width / 2, app.height / 16, text = 'Select your difficulty', font = "Cambria 35 bold")
+    canvas.create_rectangle(app.width / 3, 4 * app.height / 20, 2 * app.width / 3, 7 * app.height / 20, fill = "blue")
+    canvas.create_rectangle(app.width / 3, 9 * app.height / 20, 2 * app.width / 3, 12 * app.height / 20, fill = "blue")
+    canvas.create_rectangle(app.width / 3, 14 * app.height / 20, 2 * app.width / 3, 17 * app.height / 20, fill = "blue")
+    canvas.create_text(app.width / 2, 5.5 * app.height / 20, text = "Easy", font = "Cambria 16 bold", fill = "light green")
+    canvas.create_text(app.width / 2, 10.5 * app.height / 20, text = "Medium", font = "Cambria 16 bold", fill = "yellow")
+    canvas.create_text(app.width / 2, 15.5 * app.height / 20, text = "Hard", font = "Cambria 16 bold", fill = "red")
+
+def startScreen_mousePressed(app, event):
+    if (app.width / 3) < event.x < (2 * app.width / 3):
+        if (4 * app.height / 20) < event.y < (7 * app.height / 20):
+            app.difficulty = 'Easy'
+            initGame(app)
+        elif (9 * app.height / 20) < event.y < (12 * app.height / 20):
+            app.difficulty = "Medium"
+            initGame(app)
+        elif (14 * app.height / 20) < event.y < (17 * app.height / 20):
+            app.difficulty = "Hard"
+            initGame(app)
+
+#########################################################
+
 def pause_redrawAll(app, canvas):
-    # make sure all the variables were saved so that when you "unpause," the 
-    pass
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = 'light blue')
+    canvas.create_text(app.width / 2, app.height / 6, 
+                        text = "Press Space Bar to Continue", 
+                        font = "Cambria 23 bold")
+
+def pause_keyPressed(app, event):
+    if event.key == 'Space':
+        print(app.lastState)
+        app.mode = app.lastState
+
 
 #########################################################
 
@@ -34,7 +66,13 @@ def tutorial_mousePressed(app, event):
 #########################################################
 
 def gameOver_redrawAll(app, canvas):
-    canvas.create_rectangle(0, 0, app.width, app.height, fill = "red")
+    canvas.create_rectangle(0, 0, app.width, app.height, fill = "black")
+    canvas.create_text(app.width / 2, app.height / 2, fill = 'Red', text = "GAME OVER", font = "Cambria 35 bold")
+    canvas.create_text(8 * app.width / 9, app.height / 35, fill = 'Red', text = "Press 'R' to restart", font = "Cambria 16 bold")
+
+def gameOver_keyPressed(app, event):
+    if event.key == 'r':
+        app.mode = 'startScreen'
 
 #########################################################
 
@@ -48,27 +86,101 @@ def Shop_redrawAll(app, canvas):
     # show the player's health and money so they know what they should/can buy
     p = app.player
     canvas.create_text(app.width / 6, app.height - 10,
-                        text = f'Health: {int(p.curHealth)}', font = 'Cambria 13 bold')
+                        text = f'Health: {int(p.curHealth)} / {p.maxHealth}', font = 'Cambria 13 bold')
     canvas.create_text(5 * app.width / 6, app.height - 10,
-                        text = f'Money: {p.money}', font = 'Cambria 13 bold')
+                        text = f'Worms: {p.money}', font = 'Cambria 13 bold')
     
+    m = p.money
+
+    # Reroll Button
+    rColor = 'green' if m >= 50 else 'gray'
+    canvas.create_rectangle(1.05 * app.width / 12, 1.25 * app.height / 5, 2.85 * app.width / 12, 1.55 * app.height / 5, fill = rColor)
+    canvas.create_text(app.width / 6, 1.4 * app.height / 5, text = "Reroll Shop: \n 50 Worms", font = "Cambria 16 bold")
+
+    # Damage Item
+    dColor = 'green' if m >= app.items[0][1][0] else 'gray'
+    canvas.create_text(app.width / 6, 2 * app.height / 5, text = "Damage:", font = "Cambria 20 bold")
+    canvas.create_rectangle(0.95 * app.width / 3, 1.7 * app.height / 5, 2.05 * app.width / 3, 2.3 * app.height / 5, fill = dColor)
+    canvas.create_text(app.width / 2, 2 * app.height / 5, text = f'{app.items[0][0]}: {app.items[0][1][0]} Worms', font = "Cambria 14 bold")
+
+    # Survivability item (health, defense)
+    sColor = 'green' if m >= app.items[1][1][0] else 'gray'
+    canvas.create_text(app.width / 6,  3 * app.height / 5, text = "Survivability:", font = "Cambria 20 bold")
+    canvas.create_rectangle(0.95 * app.width / 3, 2.7 * app.height / 5, 2.05 * app.width / 3, 3.3 * app.height / 5, fill = sColor)
+    canvas.create_text(app.width / 2, 3 * app.height / 5, text = f'{app.items[1][0]}: {app.items[1][1][0]} Worms', font = "Cambria 14 bold")
+
+    # Misc Item
+    mColor = 'green' if m >= app.items[2][1][0] else 'gray'
+    canvas.create_text(app.width / 6, 4 * app.height / 5, text = "Misc:", font = "Cambria 20 bold")
+    canvas.create_rectangle(0.95 * app.width / 3, 3.7 * app.height / 5, 2.05 * app.width / 3, 4.3 * app.height / 5, fill = mColor)
+    canvas.create_text(app.width / 2, 4 * app.height / 5, text = f'{app.items[2][0]}: {app.items[2][1][0]} Worms', font = "Cambria 14 bold")
     
+def Shop_buyItem(app, itemType: int) -> None:
 
-    # Damage Items
-    canvas.create_text(app.width / 6, app.height / 5, text = "Damage:", font = "Cambria 16 bold")
+    # 0: dmg, 1: surv, 2: misc
+    cost, effects = app.items[itemType][1][0], app.items[itemType][1][1]
+    p = app.player
+    p.money -= cost
 
-    # Survivability items (health, defense)
-    canvas.create_text(app.width / 2, app.height / 5, text = "Survivability:", font = "Cambria 16 bold")
+    if itemType == 0:
+        p.dmg += effects[0]
+        p.critDmg += effects[1] / 100
+        p.critRate += effects[2]
+        p.maxHealth += effects[4]
+        p.curHealth = min(p.maxHealth, p.curHealth + effects[3])
+        p.defense += effects[5]
 
-    canvas.create_text(5 * app.width / 6, app.height / 5, text = "Misc:", font = "Cambria 16 bold")
-    pass
+    elif itemType == 1:
+        p.maxHealth += effects[1]
+        p.curHealth = min(p.maxHealth, p.curHealth + effects[0])
+        p.defense += effects[2]
+        p.speed += effects[3]
+        p.dmg += effects[4]
+
+    else: 
+        p.speed += effects[0]
+        app.mobDropMult += effects[1]
+        app.itemSpawnChanceMult += effects[2]
+        app.maxCombo += effects[3]
+        app.numOfMobs += effects[4]
+        p.defense += effects[5]
+
+    app.items = rerollItems(app.difficulty, app.level)
 
 def Shop_mousePressed(app, event):
-    loc = (event.y, event.x)
+
+    m = app.player.money
+    # reroll button
+    if (m >= 50 and
+        (1.05 * app.width / 12) < event.x < (2.85 * app.width / 12) and 
+        (1.25 * app.height / 5) < event.y < (1.55 * app.height / 5)):
+        app.player.money -= 50
+        app.items = rerollItems(app.difficulty, app.level)
+    # Dmg Item
+    elif (m >= app.items[0][1][0] and
+            (0.95 * app.width / 3) < event.x < (2.05 * app.width / 3) and
+            (1.7 * app.height / 5) < event.y < (2.3 * app.height / 5)):
+            Shop_buyItem(app, 0)
+    # Survival Item
+    elif (m >= app.items[1][1][0] and
+            (0.95 * app.width / 3) < event.x < (2.05 * app.width / 3) and
+            (2.7 * app.height / 5) < event.y < (3.3 * app.height / 5)): 
+            Shop_buyItem(app, 1)
+
+    # Misc Item
+    # 0.95 * app.width / 3, 3.7 * app.height / 5, 2.05 * app.width / 3, 4.3 * app.height / 5
+    elif (m >= app.items[2][1][0] and
+            (0.95 * app.width / 3) < event.x < (2.05 * app.width / 3) and
+            (3.7 * app.height / 5) < event.y < (4.3 * app.height / 5)):
+            Shop_buyItem(app, 2)
 
 def Shop_keyPressed(app, event):
     if event.key == "Space":
         app.mode = 'Travel'
+
+    elif event.key == 'p':
+        app.mode = 'pause'
+        app.lastState = 'Shop'
 
 #########################################################
 
@@ -161,7 +273,9 @@ def Travel_keyPressed(app, event):
     if (event.key == 's' or event.key == 'Down'): app.player.y += 1
     if (event.key == 'd' or event.key == 'Right'): app.player.x += 1
     if (event.key == 'a' or event.key == 'Left'): app.player.x -= 1
-    if (event.key == 'p'): app.paused = not app.paused
+    if (event.key == 'p'): 
+        app.mode = 'pause'
+        app.lastState = 'Travel'
 
     moveY, moveX = app.player.y - lastCoords[0], app.player.x - lastCoords[1]
 
@@ -198,6 +312,7 @@ def Travel_keyPressed(app, event):
         app.cols = app.rows
         # now change all the variables that create the board and stuff as well as get new positions
         mapType = randomMap()
+        mapType = "Dungeon"
         if mapType == "Kruskals":
             app.gameMap, app.pLoc, app.gLoc, mLocs = Kruskals((app.rows, app.cols))
         elif mapType == 'KruskalsWeave':
@@ -205,10 +320,10 @@ def Travel_keyPressed(app, event):
         else:
             app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
                 (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 2.5)
-        '''for row in app.gameMap:
+            print(app.gLoc)
+        for row in app.gameMap:
             print(row)
-        print(app.pLoc, app.gLoc, app.mLocs)'''
-        app.numOfMobs += 1 # for this maybe don't have it increase all the time, maybe make a formula
+        app.numOfMobs = max(app.numOfMobs, int((app.level * app.difficultyNum) / 5) ) # for this maybe don't have it increase all the time, maybe make a formula
         # perhaps it's 2 + (level // 2) + something abt difficulty
         # don't forget that we need to change the player location as well
         app.player.y, app.player.x = app.pLoc
@@ -216,6 +331,7 @@ def Travel_keyPressed(app, event):
         # give the player some breathing room
         app.paused = True
         app.mode = "Shop"
+        app.items = rerollItems(app.difficulty, app.level)
 
         # Essentially do all the stuff we did for the initializing thing
         # Make a helper function that gets all this stuff for us because
@@ -225,7 +341,12 @@ def Travel_keyPressed(app, event):
         app.mobListLoc = random.sample(mLocs, app.numOfMobs)
         app.mobList = [Mob(m[1], m[0], app.sW / 3, 10, i) for i, m in enumerate(app.mobListLoc)]
         app.mobCoords = {(i[0], i[1]) for i in app.mobListLoc}
-        app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.sW * 1.5, 2, 25, 100, 20) for i in app.mobList]
+        app.battleMobList = [BattleMob(app.height / 4, 
+                                        app.width / 2, 
+                                        app.sW * 1.5, 
+                                        int((app.level * app.difficultyNum) ** 0.75), 
+                                        25, 
+                                        100 * app.mobDropMult, 20) for i in app.mobList]
         app.player.radius = app.sW / 3
 
 #########################################################
@@ -289,8 +410,12 @@ def mobFight_mousePressed(app, event):
         # if the mouse is on the mob
         app.hitCounter += 1
         app.combo += 1
-        app.dmgMult = max(app.combo // 8, 1) # this is so the dmg is never 0
-        app.battleMob.curHealth -= app.dmgMult * app.battlePlayer.dmg
+        app.dmgMult = min(max(app.combo // 8, 1), app.maxCombo) # this is so the dmg is never 0 and doesn't go to infinity (combo caps at maxCombo)
+        critDmg = 1
+        critRoll = random.randrange(100)
+        if critRoll < app.battlePlayer.critRate:
+            critDmg = app.battlePlayer.critDmg
+        app.battleMob.curHealth -= app.dmgMult * app.battlePlayer.dmg * critDmg
 
         # basically check if you killed the mob, maybe insert a little
         # transition later
@@ -314,15 +439,25 @@ def mobFight_mousePressed(app, event):
 def mobFight_keyPressed(app, event):
     p = app.battlePlayer
     lastCoords = (p.y, p.x)
-    if (event.key == 'w' or event.key == 'Up'): p.y -= 10
-    if (event.key == 's' or event.key == 'Down'): p.y += 10
-    if (event.key == 'd' or event.key == 'Right'): p.x += 10
-    if (event.key == 'a' or event.key == 'Left'): p.x -= 10
+    jumpSize = app.width / 30 
+    if (event.key == 'w' or event.key == 'Up'): p.y -= jumpSize * p.speed
+    if (event.key == 's' or event.key == 'Down'): p.y += jumpSize * p.speed
+    if (event.key == 'd' or event.key == 'Right'): p.x += jumpSize * p.speed
+    if (event.key == 'a' or event.key == 'Left'): p.x -= jumpSize * p.speed
+    elif (event.key == 'p'):
+        app.mode = 'pause'
+        app.lastState = 'mobFight'
 
     # change player coords back if the space the players wants to move in is illegal
-    if (p.y < 0 or p.y > app.height or p.x < 0 or p.x > app.width):
-        p.y = lastCoords[0]
-        p.x = lastCoords[1]
+    if p.y < 0: 
+        p.y = 0
+    elif p.y > app.height: 
+        p.y = app.height    
+    
+    if p.x < 0: 
+        p.x = 0
+    elif p.x > app.width: 
+        p.x = app.width
 
 def mobFight_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill = "white")
@@ -355,33 +490,31 @@ def mobFight_redrawAll(app, canvas):
 
 #########################################################
 
-def appStartedHelper():
-    pass
+def initGame(app):
 
-def appStarted(app):
+    app.difficultyList = ['Easy', 'Medium', "Hard"] # default list
+    app.rows, app.cols = (10, 10) # determine board size
+    app.timerDelay = app.defaultTimer = 250 # default 250ms
+    app.boardHeight = 0.9 * app.height # to fit everything
+    app.initsW = app.sW = min(app.width / app.rows, app.boardHeight / app.rows) # based on yeah
+    app.mode = 'tutorial' # start at tutorial
+    app.mode = 'pause' ##*#####*********#******##*8*##
+    app.paused = False # default unpaused
+    mapType = randomMap() # get map
+    mapType = 'Dungeon'  # change when not debugging
+    app.itemSpawnChanceMult = 1 # default 1
+    app.lastState = 'Travel' # default nothing
+    app.numOfMobs = max((app.rows**2) // 50, 1) # formula for num of mobs
+    app.level = 1 # default 1
 
-    # these are things that'll change depending on difficulty
-    # take stuff from something
-    app.rows, app.cols = (25, 25)
-    app.numOfMobs = max((app.rows**2) // 100, 1)
-    app.numOfMobs = 3
-    app.timerDelay = app.defaultTimer = 250
-    app.items = dict()
 
-    # have the board use different height measurements
-    app.boardHeight = 0.9 * app.height
+    # get number representation of difficulty
+    app.difficultyNum = app.difficultyList.index(app.difficulty)
 
-    # make it relative to window size
-    app.sW = min(app.width / app.rows, app.boardHeight / app.rows)
-
-    # initiliaze game states and variables: 
-    '''Travel, Fight, etc.'''
-    app.mode = 'tutorial'
-    app.paused = False
-    app.level = 1
-    mapType = randomMap()
-    mapType = 'KruskalsWeave'
-
+    app.maxCombo = 4 + app.difficultyNum # init max combo
+    app.items = rerollItems(app.difficulty, app.level) # init items
+    app.mobDropMult = app.level * app.difficultyNum # init base mobDropMult
+    
     # initilalize map and then get start locations for player and end goal as
     # well as acceptable mob locations
     # Adjust maxTuns and maxLen scalings on difficulty****
@@ -390,50 +523,51 @@ def appStarted(app):
     elif mapType == 'KruskalsWeave':
         app.gameMap, app.pLoc, app.gLoc, mLocs = KruskalsWeave((app.rows,app.cols))
     else:
+        maxTuns = int((app.difficultyNum ** 0.5) * (app.rows + app.cols))
+        maxLen = int((app.difficultyNum ** 0.5) * app.rows // 1.5)
         app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
-            (app.rows, app.cols), int(1.2 * (app.rows + app.cols)), app.rows // 1.5)
-    for row in app.gameMap:
-        print(row)
-    print(app.pLoc, app.gLoc)
-    app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3, 0)
+            (app.rows, app.cols), maxTuns, maxLen)
+        print(app.gLoc)
+        for r in app.gameMap:
+            print(r)
+
+    # init overall player
+    app.player = Player(app.pLoc[0], app.pLoc[1], app.sW / 3)
+
     # make a list of unique mob spawning locations
     app.mobListLoc = random.sample(mLocs, app.numOfMobs)
 
-    # create a list of mob classes
+    # create a list of mob classes for travel board
     app.mobList = [Mob(m[1], m[0], app.sW / 3, 10, i) for i, m in enumerate(app.mobListLoc)]
+
+    # create a list of battle mobs for battle instance
+    app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.initsW * 1.5 / app.level, 
+                            int((app.level * app.difficultyNum) ** 0.75), 25, 
+                            100 * app.mobDropMult, 20) for i in app.mobList]
 
     # have a set to keep track of the coords so the mobs don't overlap
     app.mobCoords = {(i[0], i[1]) for i in app.mobListLoc}
 
-    # initialize a mob for the mob fight
+    # have the initial speed somewhere
+    app.initialBMSpeed = app.battleMobList[0].d 
 
-    # **Change the location so that if you meet the mob from your left then 
-    # the battle starts from left if that makes sense. From top then top and bottom,
-    # bottom then bottom top
-    # change size of mob depending on difficulty as well
-    # later change the battlemob based on difficulty parameters
-    app.battleMobList = [BattleMob(app.height / 4, app.width / 2, app.sW * 1.5, app.level * 2, 25, 100, 20) for i in app.mobList]
-
-    
-    
-    # put this in mob class
-    app.initialBMSpeed = app.battleMobList[0].d
-    # need this for later
+    # always helpful to keep track
     app.counter = 0
-    
 
-    app.battlePlayer = Player(3 * app.height / 4, app.width / 2, app.sW, 0, 100, 2)
+    # player for the fights, no change based on difficulty
+    app.battlePlayer = Player(3 * app.height / 4, app.width / 2, app.initsW, 0, 100, 2)
 
-    # put this in player class
     app.hitCounter = 0
     app.beenHitCounter = 0
     app.combo = 0
     app.dmgMult = 1
 
-    # initialize mouse pressed locations
     app.cx = app.cy = 0
 
-# clean up the code later
+def appStarted(app):
+
+    app.mode = 'startScreen'
+
 
 
 
@@ -441,4 +575,4 @@ def appStarted(app):
 
 
 if __name__ == "__main__":
-    runApp(width = 800, height = 800)
+    runApp(width = 1000, height = 1000)
