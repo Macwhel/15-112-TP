@@ -7,7 +7,7 @@ every few levels. There are also mobs scattered throughout the levels to fight \
 as well as currency and shop system to help make the player stronger.
 
 ## How to run:
-Simply run the main.py file and the game should pop right up .
+Simply run the main.py file and the game should pop right up.
 
 ## Necessary Libraries:
 All necessary libraries are already imported, and there are none that require \
