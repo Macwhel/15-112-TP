@@ -1,6 +1,7 @@
 import random
 import copy
 
+# generation of the game maps
 
 def getDirection(directions: list, lastDirection: list) -> tuple:
     dir = random.choice(directions)

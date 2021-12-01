@@ -7,6 +7,7 @@ from astar import *
 from gameInit import *
 from items import *
 
+# all the tkinter material
 
 # Screens concept from lecture notes (not sure if I needed to cite this but better safe than sorry)
 # No code was copy pasted from outside sources
@@ -258,10 +259,12 @@ def Shop_redrawAll(app, canvas):
 
     # show the player's health and money so they know what they should/can buy
     p = app.player
-    canvas.create_text(app.width / 6, app.height - 10,
+    canvas.create_text(app.width / 6, 26 * app.height / 30,
                         text = f'Health: {int(p.curHealth)} / {p.maxHealth}', font = 'Cambria 13 bold')
-    canvas.create_text(5 * app.width / 6, app.height - 10,
+    canvas.create_text(app.width / 6, 29 * app.height / 30,
                         text = f'Worms: {p.money}', font = 'Cambria 13 bold')
+    canvas.create_text(app.width / 4, 4 * app.height / 5,
+                        text = "Stats", font = "Cambria 13 bold")
     
     m = p.money
 
@@ -689,6 +692,7 @@ def initGame(app):
     app.initsW = app.sW = min(app.width / app.rows, app.boardHeight / app.rows) # based on yeah
     #app.mode = 'tutorial' # start at tutorial
     app.mode = 'Travel'
+    app.mode = 'Shop'
     app.paused = False # default unpaused
     mapType = randomMap() # get map
     app.itemSpawnChanceMult = 1 # default 1

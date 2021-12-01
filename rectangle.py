@@ -1,3 +1,5 @@
+# this is to help draw stuff
+
 class Rectangle:
     def __init__(self, y, x, width):
         self.x = x

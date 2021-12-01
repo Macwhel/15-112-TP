@@ -1,13 +1,7 @@
 import queue
 import math
 
-#make a priority queue method thing for more lines of code
-
-class PriorityQueue():
-    def __init__(self):
-        self.list1 = []
-        self.list2 = []
-
+# this file is is actually for all things movement related.
 
 # helper function for aStar
 def h(curPos: tuple, endPos: tuple) -> int:

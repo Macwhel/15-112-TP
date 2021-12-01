@@ -1,3 +1,5 @@
+# initializing the player class
+
 class Player:
     def __init__(self, y, x, radius, money = 0, health = 100, dmg = 0, speed = 0, defense = 0):
         self.x = x

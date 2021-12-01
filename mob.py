@@ -1,3 +1,4 @@
+# file for hostile mob classes
 
 class Mob:
 

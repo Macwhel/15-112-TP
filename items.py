@@ -1,5 +1,7 @@
 import random
 
+# all the functions relation to items
+
 def initItems(difficulty: str, level: int) -> tuple:
     if difficulty == 'Easy':
         d = 1
