@@ -14,5 +14,5 @@ All necessary libraries are already imported, and there are none that require \
 special installation.
 
 ## Shortcut Commands:
-There are basic shortcut commands such as 'p' for bringing up the pause menu, \ 
-'b' in the pause menu to reset the map for the level, and 'r' to reset the entire game.
+There are basic shortcut commands such as 'p' for bringing up the pause menu, 'b' \
+in the pause menu to reset the map for the level, and 'r' to reset the entire game.
