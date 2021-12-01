@@ -81,7 +81,7 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
         if goalNodeIt >= 1:
             goalNodeIt -= 1
         else:
-            if r in range(rows) or c in range(cols):
+            if r in range(rows) and c in range(cols):
                 goalPos = (r,c) # there's something wrong here in determining the goal pos
         lastDir = dir
 
@@ -95,9 +95,9 @@ def createMap(dimensions: tuple, maxTuns: int, maxLen: int) -> tuple:
     return (gameMap, firstPos, goalPos, legalMobPos)
 
 
-# try to implement based on description, no outside pseudocode
-# utilized 4 slides/pictures
+# utilized 4 slides/pictures, no code/pseudocode
 # http://www.jamisbuck.org/presentations/rubyconf2011/index.html#kruskals
+
 def Kruskals(dimensions: tuple) -> list:
 
     # init variables
@@ -182,6 +182,9 @@ def Kruskals(dimensions: tuple) -> list:
                 break
     # (gameMap, firstPos, goalPos, legalMobPos)
     return board, firstPos, goalPos, legalMobPos
+
+# referenced one demo, no code/pseudocode
+# http://www.jamisbuck.org/presentations/rubyconf2011/index.html#kruskal-weave-demo# 
 
 def KruskalsWeave(dimensions: tuple) -> list:
 

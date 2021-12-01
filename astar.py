@@ -14,6 +14,9 @@ def h(curPos: tuple, endPos: tuple) -> int:
     # manhatten distance
     return (abs(curPos[0] - endPos[0]) + abs(curPos[1] - endPos[1]))
 
+def e(curPos: tuple, endPos: tuple) -> int:
+    # euclidean distance
+    return ((curPos[0] - endPos[0])**2 + (curPos[1] - endPos[1])**2)**0.5
 # Referenced wikipedia for pseudocode
 # https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
 # Referenced youtube videos for pseudocode 

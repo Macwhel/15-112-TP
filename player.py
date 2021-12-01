@@ -1,5 +1,5 @@
 class Player:
-    def __init__(self, y, x, radius, money = 0, health = 100, dmg = 0, defense = 0):
+    def __init__(self, y, x, radius, money = 0, health = 100, dmg = 0, speed = 0, defense = 0):
         self.x = x
         self.y = y
         self.color = 'yellow'
@@ -10,7 +10,7 @@ class Player:
         self.defense = defense
         self.critRate = 0
         self.critDmg = 1.5
-        self.speed = 1
+        self.speed = speed
 
     def setY(self, newY):
         self.y = newY
