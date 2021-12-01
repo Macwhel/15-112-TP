@@ -4,7 +4,6 @@ from map import *
 from rectangle import *
 from mob import *
 from astar import *
-from gameInit import *
 from items import *
 
 # all the tkinter material
@@ -36,10 +35,10 @@ def initBossFight(app):
 
     app.bossProjectileList = []
 
-
 def bossFight_redrawAll(app, canvas):
     # draw boss
     b = app.boss
+    rp = app.player
     canvas.create_oval(b.x - b.rad, b.y - b.rad,
                         b.x + b.rad, b.y + b.rad,
                         fill = b.color, width = 10)
@@ -63,9 +62,9 @@ def bossFight_redrawAll(app, canvas):
     canvas.create_text(app.width / 4, app.height / 9,
                         text = f'Dmg Multiplier: {app.dmgMult}x', font = 'Cambria 13 bold')
     canvas.create_text(3 * app.width / 4, app.height / 9,
-                        text = f'Health: {int(bp.curHealth)} / {int(bp.maxHealth)}', font = 'Cambria 13 bold')
+                        text = f'Health: {int(rp.curHealth)} / {int(rp.maxHealth)}', font = 'Cambria 13 bold')
     canvas.create_text(app.width / 2, app.height / 20,
-                        text = f'Mob Health: {((b.curHealth / b.maxHealth) * 100):.2f}%')
+                        text = f'Boss Health: {((b.curHealth / b.maxHealth) * 100):.2f}%')
 
 def beatBoss(app):
     app.mode = "Shop"
@@ -110,7 +109,6 @@ def bossFight_mousePressed(app, event):
                 if p.curHealth <= 0:
                     app.bossProjectileList.pop(i)
 
-
 def bossFight_keyPressed(app, event):
     p = app.battlePlayer
     lastCoords = (p.y, p.x)
@@ -144,8 +142,8 @@ def fireProjectile(app):
                                     xLocations.pop(0), # x coord
                                     app.width / 25, # radius
                                     2 * app.difficultyNum, # speed
-                                    8 * app.difficultyNum,
-                                    5 * app.difficultyNum,
+                                    8 * app.difficultyNum, # health
+                                    5 * app.difficultyNum, # damage
                                     dy / 2.5,
                                     dx / 2.5)
         app.bossProjectileList.append(projectile)
@@ -202,10 +200,21 @@ def pause_redrawAll(app, canvas):
     canvas.create_text(app.width / 2, app.height / 6, 
                         text = "Press Space Bar to Continue", 
                         font = "Cambria 23 bold")
+    canvas.create_text(app.width / 2, app.height / 2,
+                        text = "If you encounter the very rare \nunsolvable maze, press b to get a new maze",
+                        font = "Cambria 23 bold")
+    canvas.create_text(app.width / 2, app.height * 3 / 4,
+                        text = 'Press r to reset the game',
+                        font = "Cambria 23 bold")
 
 def pause_keyPressed(app, event):
     if event.key == 'Space':
         app.mode = app.lastState
+    elif event.key == 'b':
+        resetLevel(app)
+        app.mode = 'Travel'
+    elif event.key == 'r':
+        app.mode = 'startScreen'
 
 #########################################################
 
@@ -254,17 +263,20 @@ def Shop_redrawAll(app, canvas):
         else:
             aText = 'rd'
         text = f'{levelBoss}{aText} Boss Fight Completed'
-    canvas.create_text(app.width / 2, app.height / 20, text = f'Level {app.level} Completed', font = "Cambria 32 bold")
-    canvas.create_text(app.width / 2, app.height / 8, text = 'Shop', font = "Cambria 20 bold")
+    canvas.create_text(app.width / 2, app.height / 20, text = f'Level {app.level - 1} Completed', font = "Cambria 32 bold")
+    canvas.create_text(app.width / 2, app.height / 8, text = 'Shop', font = "Cambria 25 bold")
+    canvas.create_text(app.width / 2, app.height / 6, text = "Press Space to Continue", font = 'Cambria 20 bold')
 
     # show the player's health and money so they know what they should/can buy
     p = app.player
-    canvas.create_text(app.width / 6, 26 * app.height / 30,
+    bp = app.battlePlayer
+    canvas.create_text(app.width / 6, 28 * app.height / 30,
                         text = f'Health: {int(p.curHealth)} / {p.maxHealth}', font = 'Cambria 13 bold')
     canvas.create_text(app.width / 6, 29 * app.height / 30,
                         text = f'Worms: {p.money}', font = 'Cambria 13 bold')
-    canvas.create_text(app.width / 4, 4 * app.height / 5,
-                        text = "Stats", font = "Cambria 13 bold")
+    canvas.create_text(app.width / 2, 28.5 * app.height / 30,
+                        text = f"Stats: \nAttack: {bp.dmg} \t Crit Rate: {bp.critRate}% \t Crit Damage {bp.critDmg * 100}% \nSpeed: {bp.speed} \t Damage Reduction: {bp.defense}",
+                        font = "Cambria 13 bold")
     
     m = p.money
 
@@ -311,7 +323,7 @@ def Shop_buyItem(app, itemType: int) -> None:
         p.maxHealth += effects[1]
         p.curHealth = min(p.maxHealth, p.curHealth + effects[0])
         pb.defense += effects[2]
-        pb.speed *= effects[3]
+        pb.speed = pb.speed * effects[3] if effects[3] != 0 else pb.speed
         pb.dmg += effects[4]
 
     else: 
@@ -322,11 +334,11 @@ def Shop_buyItem(app, itemType: int) -> None:
         app.numOfMobs += effects[4]
         pb.defense += effects[5]
 
-    app.items = rerollItems(app.difficulty, app.level)
+    app.items = rerollItems(app.difficulty, app.level - 1)
 
 def Shop_mousePressed(app, event):
 
-    m = app.player.money
+    m = app.erer.money
     # reroll button
     if (m >= 50 and
         (1.05 * app.width / 12) < event.x < (2.85 * app.width / 12) and 
@@ -353,7 +365,7 @@ def Shop_mousePressed(app, event):
 
 def Shop_keyPressed(app, event):
     if event.key == "Space":
-        if app.level % 3 == 0 and app.lastState != 'bossFight':
+        if (app.level - 1) % 3 == 0 and app.lastState != 'bossFight':
             app.mode = app.lastState = 'bossFight'
             initBossFight(app)
         else: 
@@ -421,10 +433,12 @@ def Travel_redrawAll(app, canvas):
     canvas.create_line(border, 0, border, app.boardHeight, width = 3)
 
     # draw the stuff I'll use later
-    canvas.create_text(app.width / 6, app.height - 10,
+    canvas.create_text(app.width / 6, 39 * app.height / 40,
                         text = f'Health: {int(p.curHealth)} / {int(p.maxHealth)}', font = 'Cambria 13 bold')
-    canvas.create_text(5 * app.width / 6, app.height - 10,
+    canvas.create_text(5 * app.width / 6, 39 * app.height / 40,
                         text = f'Money: {p.money}', font = 'Cambria 13 bold')
+    canvas.create_text(app.width / 2, 39 * app.height / 40,
+                        text = f'Level: {app.level}', font = 'Cambria 13 bold')
 
 def Travel_timerFired(app):
     # get the next position for all mobs
@@ -453,12 +467,14 @@ def Travel_keyPressed(app, event):
 
     if app.paused: app.paused = False
     if (event.key == 'w' or event.key == 'Up'): app.player.y -= 1
-    if (event.key == 's' or event.key == 'Down'): app.player.y += 1
-    if (event.key == 'd' or event.key == 'Right'): app.player.x += 1
-    if (event.key == 'a' or event.key == 'Left'): app.player.x -= 1
-    if (event.key == 'p'): 
+    elif (event.key == 's' or event.key == 'Down'): app.player.y += 1
+    elif (event.key == 'd' or event.key == 'Right'): app.player.x += 1
+    elif (event.key == 'a' or event.key == 'Left'): app.player.x -= 1
+    elif (event.key == 'p'): 
         app.mode = 'pause'
         app.lastState = 'Travel'
+    elif (event.key == 'r'):
+        app.mode = 'startScreen'
 
     moveY, moveX = app.player.y - lastCoords[0], app.player.x - lastCoords[1]
 
@@ -633,6 +649,33 @@ def mobFight_redrawAll(app, canvas):
 
 #########################################################
 
+def resetLevel(app):
+    mapType = randomMap()
+    app.mapTypeNum = app.maps.index(mapType)
+    if mapType == "Kruskals":
+        app.gameMap, app.pLoc, app.gLoc, mLocs = Kruskals((app.rows, app.cols))
+    elif mapType == 'KruskalsWeave':
+        app.gameMap, app.pLoc, app.gLoc, mLocs = KruskalsWeave((app.rows, app.cols))
+    else:
+        app.gameMap, app.pLoc, app.gLoc, mLocs = createMap(
+            (app.rows, app.cols), int(app.difficultyNum * (app.rows)), app.rows // 1.5)
+            
+    app.player.y, app.player.x = app.pLoc
+    app.paused = True
+    app.travelCounter = 0
+    app.sW = min(app.width / app.rows, app.boardHeight / app.rows)
+    app.boardHeight = 0.9 * app.height
+    app.mobListLoc = random.sample(mLocs, app.numOfMobs)
+    app.mobList = [Mob(m[1], m[0], app.sW / 3, 10, i) for i, m in enumerate(app.mobListLoc)]
+    app.mobCoords = {(i[0], i[1]) for i in app.mobListLoc}
+    app.battleMobList = [BattleMob(app.height / 4, 
+                                    app.width / 2, 
+                                    app.sW * 1.5, 
+                                    int(app.level * app.difficultyNum ** 0.75), 
+                                    25, 
+                                    100 * app.mobDropMult, 20) for i in app.mobList]
+    app.player.radius = app.sW / 3
+
 def beatLevel(app):
     mn = app.mapTypeNum
     if mn == 0: expectedTime = app.rows * 10 # aka 1.2app.rows seconds
@@ -692,13 +735,12 @@ def initGame(app):
     app.initsW = app.sW = min(app.width / app.rows, app.boardHeight / app.rows) # based on yeah
     #app.mode = 'tutorial' # start at tutorial
     app.mode = 'Travel'
-    app.mode = 'Shop'
-    app.paused = False # default unpaused
+    app.paused = True # default paused
     mapType = randomMap() # get map
     app.itemSpawnChanceMult = 1 # default 1
     app.lastState = 'Travel' # default nothing
     app.numOfMobs = max((app.rows**2) // 150, 1) # formula for num of mobs
-    app.level = 2 # default 1 # CHANGE LATER
+    app.level = 1 # default 1
     app.noticeRange = (app.rows // 3 * app.difficultyNum)
 
 
@@ -751,7 +793,7 @@ def initGame(app):
     # player for the fights, no change based on difficulty
     app.battlePlayer = Player(3 * app.height / 4, # y
                                 app.width / 2, # x
-                                app.initsW / 4, # radius
+                                app.initsW / 2, # radius
                                 0, # money
                                 100, # health
                                 2, # dmg

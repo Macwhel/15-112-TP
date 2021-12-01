@@ -314,9 +314,6 @@ def KruskalsWeave(dimensions: tuple) -> list:
 
             paths.pop(inLoc)
 
-            '''print(paths, len(paths))
-            for r in board:
-                print(r)'''
 
     # 5
     while len(paths) > 1:
