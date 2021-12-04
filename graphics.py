@@ -338,7 +338,7 @@ def Shop_buyItem(app, itemType: int) -> None:
 
 def Shop_mousePressed(app, event):
 
-    m = app.erer.money
+    m = app.player.money
     # reroll button
     if (m >= 50 and
         (1.05 * app.width / 12) < event.x < (2.85 * app.width / 12) and 
